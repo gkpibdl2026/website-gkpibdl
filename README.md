@@ -1,6 +1,11 @@
-# Website GKPI Bandar Lampung
+# 🏛️ Website GKPI Bandar Lampung
 
-Website resmi gereja GKPI Bandar Lampung dengan Next.js, Supabase, Firebase Auth, dan Tailwind CSS.
+> Website resmi Gereja Kristen Protestan Indonesia (GKPI) Bandar Lampung
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwind-css)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase)
+![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?logo=firebase)
 
 ## 🚀 Quick Start
 
