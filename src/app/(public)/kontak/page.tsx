@@ -107,7 +107,7 @@ export default function KontakPage() {
                     type="text"
                     id="name"
                     name="name"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder:text-gray-500"
                     placeholder="Masukkan nama Anda"
                     required
                   />
@@ -121,7 +121,7 @@ export default function KontakPage() {
                     type="email"
                     id="email"
                     name="email"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder:text-gray-500"
                     placeholder="Masukkan email Anda"
                     required
                   />
@@ -135,7 +135,7 @@ export default function KontakPage() {
                     type="text"
                     id="subject"
                     name="subject"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder:text-gray-500"
                     placeholder="Tentang apa pesan Anda?"
                     required
                   />
@@ -149,7 +149,7 @@ export default function KontakPage() {
                     id="message"
                     name="message"
                     rows={5}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all resize-none placeholder:text-gray-500"
                     placeholder="Tulis pesan Anda di sini..."
                     required
                   ></textarea>
