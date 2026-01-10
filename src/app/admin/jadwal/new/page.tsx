@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useNotification } from '@/context/NotificationContext'
+import { useRouter } from 'next/navigation'
 
 const daysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 
@@ -15,6 +17,8 @@ export default function NewJadwal() {
     active: true,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { showToast } = useNotification()
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,13 +32,13 @@ export default function NewJadwal() {
       })
       
       if (res.ok) {
-        alert('Jadwal berhasil disimpan!')
-        window.location.href = '/admin/jadwal'
+        showToast('Jadwal berhasil disimpan!', 'success')
+        router.push('/admin/jadwal')
       } else {
         throw new Error('Failed to save')
       }
     } catch {
-      alert('Gagal menyimpan jadwal')
+      showToast('Gagal menyimpan jadwal', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -50,13 +54,13 @@ export default function NewJadwal() {
           Kembali
         </Link>
         <h2 className="text-2xl font-bold text-white">Tambah Jadwal Ibadah</h2>
-        <p className="text-gray-300 mt-1">Buat jadwal ibadah baru</p>
+        <p className="text-white/80 mt-1">Buat jadwal ibadah baru</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Nama Ibadah <span className="text-red-500">*</span>
             </label>
             <input
@@ -64,7 +68,7 @@ export default function NewJadwal() {
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
               placeholder="Contoh: Ibadah Minggu Pagi"
               required
             />
@@ -72,14 +76,14 @@ export default function NewJadwal() {
 
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <label htmlFor="day" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="day" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Hari <span className="text-red-500">*</span>
               </label>
               <select
                 id="day"
                 value={formData.day}
                 onChange={(e) => setFormData({ ...formData, day: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-white"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 required
               >
                 {daysOfWeek.map((day) => (
@@ -88,7 +92,7 @@ export default function NewJadwal() {
               </select>
             </div>
             <div>
-              <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="time" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Waktu <span className="text-red-500">*</span>
               </label>
               <input
@@ -96,7 +100,7 @@ export default function NewJadwal() {
                 id="time"
                 value={formData.time}
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
                 placeholder="Contoh: 07:00 WIB"
                 required
               />
@@ -104,7 +108,7 @@ export default function NewJadwal() {
           </div>
 
           <div>
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Lokasi
             </label>
             <input
@@ -112,13 +116,13 @@ export default function NewJadwal() {
               id="location"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
               placeholder="Contoh: Gedung Utama"
             />
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Keterangan
             </label>
             <textarea
@@ -126,7 +130,7 @@ export default function NewJadwal() {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500 resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
               placeholder="Keterangan tambahan (opsional)"
             />
           </div>
@@ -139,12 +143,12 @@ export default function NewJadwal() {
               onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
               className="w-4 h-4"
             />
-            <label htmlFor="active" className="text-gray-700">Jadwal aktif (tampilkan di website)</label>
+            <label htmlFor="active" className="text-gray-700 dark:text-gray-300">Jadwal aktif (tampilkan di website)</label>
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-4">
-          <Link href="/admin/jadwal" className="px-6 py-3 text-gray-700 font-medium hover:bg-gray-100 rounded-xl transition-colors">
+          <Link href="/admin/jadwal" className="px-6 py-3 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
             Batal
           </Link>
           <button

@@ -2,11 +2,14 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { useNotification } from '@/context/NotificationContext'
 
 export default function EditWarta() {
   const params = useParams()
   const id = params.id as string
+  const router = useRouter()
+  const { showToast } = useNotification()
   
   const [formData, setFormData] = useState({
     title: '',
@@ -52,13 +55,13 @@ export default function EditWarta() {
       })
       
       if (res.ok) {
-        alert('Warta berhasil diupdate!')
-        window.location.href = '/admin/warta'
+        showToast('Warta berhasil diupdate!', 'success')
+        router.push('/admin/warta')
       } else {
         throw new Error('Failed to update')
       }
     } catch {
-      alert('Gagal mengupdate warta')
+      showToast('Gagal mengupdate warta', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -82,13 +85,13 @@ export default function EditWarta() {
           Kembali
         </Link>
         <h2 className="text-2xl font-bold text-white">Edit Warta</h2>
-        <p className="text-gray-300 mt-1">Perbarui berita atau renungan</p>
+        <p className="text-white/80 mt-1">Perbarui berita atau renungan</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Judul Warta <span className="text-red-500">*</span>
             </label>
             <input
@@ -96,13 +99,13 @@ export default function EditWarta() {
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Ringkasan
             </label>
             <textarea
@@ -110,12 +113,12 @@ export default function EditWarta() {
               value={formData.excerpt}
               onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
               rows={2}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
             />
           </div>
 
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Konten <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -123,7 +126,7 @@ export default function EditWarta() {
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               rows={12}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
               required
             />
           </div>
@@ -137,7 +140,7 @@ export default function EditWarta() {
                 onChange={() => setFormData({ ...formData, published: false })}
                 className="w-4 h-4"
               />
-              <span className="text-gray-700">Draft</span>
+              <span className="text-gray-700 dark:text-gray-300">Draft</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -147,13 +150,13 @@ export default function EditWarta() {
                 onChange={() => setFormData({ ...formData, published: true })}
                 className="w-4 h-4"
               />
-              <span className="text-gray-700">Published</span>
+              <span className="text-gray-700 dark:text-gray-300">Published</span>
             </label>
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-4">
-          <Link href="/admin/warta" className="px-6 py-3 text-gray-700 font-medium hover:bg-gray-100 rounded-xl transition-colors">
+          <Link href="/admin/warta" className="px-6 py-3 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
             Batal
           </Link>
           <button

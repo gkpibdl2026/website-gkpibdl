@@ -6,6 +6,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const active = searchParams.get('active')
+    const limit = searchParams.get('limit')
 
     let query = supabaseAdmin
       .from('jadwal_ibadah')
@@ -14,6 +15,10 @@ export async function GET(request: Request) {
 
     if (active === 'true') {
       query = query.eq('active', true)
+    }
+
+    if (limit) {
+      query = query.limit(parseInt(limit))
     }
 
     const { data, error } = await query

@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { JSX, useEffect } from 'react'
+import { JSX, useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 const sidebarItems = [
   { href: '/admin', label: 'Dashboard', icon: 'home' },
@@ -49,6 +50,7 @@ export default function AdminLayout({
   const pathname = usePathname()
   const router = useRouter()
   const { user, loading } = useAuth()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -58,7 +60,7 @@ export default function AdminLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
         <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
       </div>
     )
@@ -69,20 +71,41 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 w-64 bg-[#1e3a5f] border-r border-[#2d4a6f] hidden lg:block">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Desktop & Mobile Drawer */}
+      <aside 
+        className={`fixed inset-y-0 left-0 w-64 bg-[#1e3a5f] dark:bg-gray-800 border-r border-[#2d4a6f] dark:border-gray-700 z-50 transform transition-transform duration-300 ease-in-out ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0`}
+      >
         {/* Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-[#2d4a6f]">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-[#2d4a6f] dark:border-gray-700">
           <Link href="/admin" className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
               <span className="text-white font-bold text-sm">G</span>
             </div>
             <div>
-              <p className="font-bold text-white text-sm leading-tight">GKPI Admin</p>
-              <p className="text-xs text-gray-300">Dashboard</p>
+              <p className="font-bold text-white! text-sm leading-tight">GKPI Admin</p>
+              <p className="text-xs text-white!">Dashboard</p>
             </div>
           </Link>
+          {/* Close button for mobile */}
+          <button 
+            className="lg:hidden p-2 rounded-lg hover:bg-[#2d4a6f] dark:hover:bg-gray-700 text-white!"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
         {/* Nav Items */}
@@ -91,10 +114,11 @@ export default function AdminLayout({
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setIsMobileMenuOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 pathname === item.href
-                  ? 'bg-blue-600/20 text-blue-400'
-                  : 'text-gray-300 hover:bg-[#2d4a6f] hover:text-white'
+                  ? 'bg-blue-600/20 text-white!'
+                  : 'text-white! hover:bg-[#2d4a6f] dark:hover:bg-gray-700 hover:text-white!'
               }`}
             >
               {icons[item.icon]}
@@ -104,10 +128,10 @@ export default function AdminLayout({
         </nav>
 
         {/* Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#2d4a6f]">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#2d4a6f] dark:border-gray-700">
           <Link
             href="/"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-[#2d4a6f] hover:text-white transition-colors"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white! hover:bg-[#2d4a6f] dark:hover:bg-gray-700 hover:text-white! transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -120,17 +144,23 @@ export default function AdminLayout({
       {/* Main Content */}
       <div className="lg:pl-64">
         {/* Top Bar */}
-        <header className="h-16 bg-[#1e3a5f] border-b border-[#2d4a6f] flex items-center justify-between px-6 sticky top-0 z-10">
+        <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
           <div className="flex items-center gap-4">
             {/* Mobile menu button */}
-            <button className="lg:hidden p-2 rounded-lg hover:bg-[#2d4a6f] text-white">
+            <button 
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-200"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-lg font-semibold text-white">Dashboard Admin</h1>
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Dashboard Admin</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+            {/* User Avatar */}
             <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
               <span className="text-sm font-medium text-white">A</span>
             </div>
@@ -138,10 +168,28 @@ export default function AdminLayout({
         </header>
 
         {/* Page Content */}
-        <main className="p-6 bg-[#1e3a5f] min-h-[calc(100vh-64px)]">
+        <main className="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-[calc(100vh-64px)]">
           {children}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#1e3a5f] dark:bg-gray-800 border-t border-[#2d4a6f] dark:border-gray-700 flex justify-around items-center h-16 lg:hidden z-30">
+        {sidebarItems.slice(0, 5).map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
+              pathname === item.href
+                ? 'text-blue-400'
+                : 'text-white! hover:text-white!'
+            }`}
+          >
+            {icons[item.icon]}
+            <span className="text-xs mt-1">{item.label.split(' ')[0]}</span>
+          </Link>
+        ))}
+      </nav>
     </div>
   )
 }

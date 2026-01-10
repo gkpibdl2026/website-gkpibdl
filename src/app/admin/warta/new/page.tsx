@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useNotification } from '@/context/NotificationContext'
+import { useRouter } from 'next/navigation'
 
 export default function NewWarta() {
   const [formData, setFormData] = useState({
@@ -11,18 +13,38 @@ export default function NewWarta() {
     status: 'draft',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { showToast } = useNotification()
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     
-    // TODO: Submit to API
-    console.log('Submitting:', formData)
-    
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/warta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.title,
+          content: formData.content,
+          excerpt: formData.excerpt || null,
+          published: formData.status === 'published',
+        }),
+      })
+      
+      if (res.ok) {
+        showToast('Warta berhasil disimpan!', 'success')
+        router.push('/admin/warta')
+      } else {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to save')
+      }
+    } catch (error) {
+      console.error('Error saving warta:', error)
+      showToast('Gagal menyimpan warta. Silakan coba lagi.', 'error')
+    } finally {
       setIsSubmitting(false)
-      alert('Warta berhasil disimpan!')
-    }, 1000)
+    }
   }
 
   return (
@@ -44,10 +66,10 @@ export default function NewWarta() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-6">
           {/* Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Judul Warta <span className="text-red-500">*</span>
             </label>
             <input
@@ -55,7 +77,7 @@ export default function NewWarta() {
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
               placeholder="Masukkan judul warta"
               required
             />
@@ -63,7 +85,7 @@ export default function NewWarta() {
 
           {/* Excerpt */}
           <div>
-            <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Ringkasan
             </label>
             <textarea
@@ -71,14 +93,14 @@ export default function NewWarta() {
               value={formData.excerpt}
               onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
               rows={2}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
               placeholder="Ringkasan singkat warta (opsional)"
             />
           </div>
 
           {/* Content */}
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Konten <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -86,23 +108,23 @@ export default function NewWarta() {
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               rows={12}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
               placeholder="Tulis konten warta di sini..."
               required
             />
-            <p className="text-gray-500 text-sm mt-2">Tip: Gunakan format Markdown untuk styling teks</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">Tip: Gunakan format Markdown untuk styling teks</p>
           </div>
 
           {/* Image Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Gambar Utama
             </label>
-            <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-blue-300 transition-colors cursor-pointer">
+            <div className="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-xl p-8 text-center hover:border-blue-300 dark:hover:border-blue-500 transition-colors cursor-pointer">
               <svg className="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <p className="text-gray-600 mb-2">Klik untuk upload atau drag & drop</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-2">Klik untuk upload atau drag & drop</p>
               <p className="text-gray-400 text-sm">PNG, JPG hingga 5MB</p>
               <input type="file" className="hidden" accept="image/*" />
             </div>
@@ -110,7 +132,7 @@ export default function NewWarta() {
 
           {/* Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Status
             </label>
             <div className="flex gap-4">
@@ -123,7 +145,7 @@ export default function NewWarta() {
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className="text-gray-700">Draft</span>
+                <span className="text-gray-700 dark:text-gray-300">Draft</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -134,7 +156,7 @@ export default function NewWarta() {
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className="text-gray-700">Publish Langsung</span>
+                <span className="text-gray-700 dark:text-gray-300">Publish Langsung</span>
               </label>
             </div>
           </div>
@@ -144,7 +166,7 @@ export default function NewWarta() {
         <div className="flex items-center justify-end gap-4">
           <Link
             href="/admin/warta"
-            className="px-6 py-3 text-gray-700 font-medium hover:bg-gray-100 rounded-xl transition-colors"
+            className="px-6 py-3 text-gray-300 dark:text-gray-400 font-medium hover:bg-gray-700 dark:hover:bg-gray-600 rounded-xl transition-colors"
           >
             Batal
           </Link>

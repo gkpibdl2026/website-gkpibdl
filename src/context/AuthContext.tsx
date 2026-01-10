@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
 // Mock user type (tanpa Firebase)
 interface MockUser {
@@ -17,16 +17,34 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const AUTH_STORAGE_KEY = 'gkpi_admin_user'
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Mock: langsung set user sebagai admin untuk development
   const [user, setUser] = useState<MockUser | null>(null)
-  const [loading] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  // Load user from localStorage on mount
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem(AUTH_STORAGE_KEY)
+      if (storedUser) {
+        setUser(JSON.parse(storedUser))
+      }
+    } catch (error) {
+      console.error('Error loading auth state:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   const signIn = async (email: string, password: string) => {
     // Mock login - terima semua email/password untuk development
     // TODO: Ganti dengan Firebase auth setelah config benar
     if (email && password) {
-      setUser({ email, uid: 'mock-uid-123' })
+      const mockUser = { email, uid: 'mock-uid-123' }
+      setUser(mockUser)
+      // Persist to localStorage
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(mockUser))
     } else {
       throw new Error('Email dan password harus diisi')
     }
@@ -34,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     setUser(null)
+    localStorage.removeItem(AUTH_STORAGE_KEY)
   }
 
   return (

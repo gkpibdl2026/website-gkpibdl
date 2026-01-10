@@ -2,11 +2,14 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { useNotification } from '@/context/NotificationContext'
 
 export default function EditKeuangan() {
   const params = useParams()
   const id = params.id as string
+  const router = useRouter()
+  const { showToast } = useNotification()
   
   const [formData, setFormData] = useState({
     title: '',
@@ -60,13 +63,13 @@ export default function EditKeuangan() {
       })
       
       if (res.ok) {
-        alert('Laporan berhasil diupdate!')
-        window.location.href = '/admin/keuangan'
+        showToast('Laporan berhasil diupdate!', 'success')
+        router.push('/admin/keuangan')
       } else {
         throw new Error('Failed')
       }
     } catch {
-      alert('Gagal mengupdate laporan')
+      showToast('Gagal mengupdate laporan', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -93,83 +96,83 @@ export default function EditKeuangan() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">Judul</label>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Judul</label>
               <input
                 type="text"
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-amber-500"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-amber-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
                 required
               />
             </div>
             <div>
-              <label htmlFor="period" className="block text-sm font-medium text-gray-700 mb-2">Periode</label>
+              <label htmlFor="period" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Periode</label>
               <input
                 type="text"
                 id="period"
                 value={formData.period}
                 onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-amber-500"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-amber-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Keterangan</label>
             <textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-amber-500 resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-amber-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
             />
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
             <div>
-              <label htmlFor="pemasukan" className="block text-sm font-medium text-gray-700 mb-2">Pemasukan (Rp)</label>
+              <label htmlFor="pemasukan" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pemasukan (Rp)</label>
               <input
                 type="number"
                 id="pemasukan"
                 value={formData.pemasukan}
                 onChange={(e) => setFormData({ ...formData, pemasukan: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
               />
             </div>
             <div>
-              <label htmlFor="pengeluaran" className="block text-sm font-medium text-gray-700 mb-2">Pengeluaran (Rp)</label>
+              <label htmlFor="pengeluaran" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pengeluaran (Rp)</label>
               <input
                 type="number"
                 id="pengeluaran"
                 value={formData.pengeluaran}
                 onChange={(e) => setFormData({ ...formData, pengeluaran: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
               />
             </div>
             <div>
-              <label htmlFor="saldo" className="block text-sm font-medium text-gray-700 mb-2">Saldo (Rp)</label>
+              <label htmlFor="saldo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Saldo (Rp)</label>
               <input
                 type="number"
                 id="saldo"
                 value={formData.saldo}
                 onChange={(e) => setFormData({ ...formData, saldo: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
               />
             </div>
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-4">
-          <Link href="/admin/keuangan" className="px-6 py-3 text-gray-700 font-medium hover:bg-gray-100 rounded-xl">Batal</Link>
+          <Link href="/admin/keuangan" className="px-6 py-3 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">Batal</Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-3 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 disabled:opacity-50"
+            className="px-6 py-3 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 transition-colors disabled:opacity-50"
           >
             {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
           </button>

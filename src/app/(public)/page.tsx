@@ -1,30 +1,81 @@
+'use client'
+
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
-// Temporary mock data - will be replaced with database queries
-const mockJadwal = [
-  { id: 1, name: "Ibadah Minggu Pagi", day: "Minggu", time: "07:00 WIB", location: "Gedung Utama" },
-  { id: 2, name: "Ibadah Minggu Siang", day: "Minggu", time: "10:00 WIB", location: "Gedung Utama" },
-  { id: 3, name: "Ibadah Pemuda", day: "Sabtu", time: "17:00 WIB", location: "Aula Pemuda" },
-];
+interface Jadwal {
+  id: string;
+  name: string;
+  day: string;
+  time: string;
+  location: string;
+}
 
-const mockPengumuman = [
-  { id: 1, title: "Pendaftaran Sekolah Minggu", content: "Pendaftaran Sekolah Minggu tahun ajaran baru telah dibuka. Segera daftarkan putra-putri Anda.", priority: "important" },
-  { id: 2, title: "Latihan Paduan Suara", content: "Latihan paduan suara setiap Sabtu pukul 15.00 WIB di ruang musik.", priority: "normal" },
-];
+interface Pengumuman {
+  id: string;
+  title: string;
+  content: string;
+  priority: string;
+}
 
-const mockWarta = [
-  { id: 1, title: "Renungan Minggu: Kasih yang Sejati", excerpt: "Kasih yang sejati adalah kasih yang tidak mengharapkan balasan, melainkan memberi dengan tulus ikhlas.", date: "6 Jan 2026" },
-  { id: 2, title: "Perayaan Natal 2025 Bersama Jemaat", excerpt: "Dokumentasi perayaan Natal bersama jemaat GKPI Bandar Lampung yang penuh sukacita.", date: "25 Des 2025" },
-  { id: 3, title: "Bakti Sosial ke Panti Asuhan", excerpt: "GKPI Bandar Lampung mengadakan bakti sosial ke panti asuhan sebagai wujud kasih.", date: "20 Des 2025" },
-];
+interface Warta {
+  id: string;
+  title: string;
+  excerpt: string | null;
+  created_at: string;
+}
 
-// Renungan Harian (Daily Devotion) - like pmkitera
+// Renungan Harian (Daily Devotion) - static for now
 const renunganHariIni = {
   ayat: "Takut akan TUHAN adalah permulaan hikmat, dan mengenal Yang Mahakudus adalah pengertian.",
   kitab: "Amsal 9:10"
 };
 
 export default function Home() {
+  const [jadwalData, setJadwalData] = useState<Jadwal[]>([]);
+  const [pengumumanData, setPengumumanData] = useState<Pengumuman[]>([]);
+  const [wartaData, setWartaData] = useState<Warta[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  const fetchAllData = async () => {
+    try {
+      const [jadwalRes, pengumumanRes, wartaRes] = await Promise.all([
+        fetch('/api/jadwal?active=true&limit=3'),
+        fetch('/api/pengumuman?visible=true&limit=2'),
+        fetch('/api/warta?published=true&limit=3'),
+      ]);
+
+      if (jadwalRes.ok) {
+        const { data } = await jadwalRes.json();
+        setJadwalData(data || []);
+      }
+      if (pengumumanRes.ok) {
+        const { data } = await pengumumanRes.json();
+        setPengumumanData(data || []);
+      }
+      if (wartaRes.ok) {
+        const { data } = await wartaRes.json();
+        setWartaData(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
   return (
     <>
       {/* Hero Section - Split Layout like pmkitera */}
@@ -85,19 +136,27 @@ export default function Home() {
                 <span className="text-blue-200 text-sm font-medium uppercase tracking-wide">Jadwal Ibadah Mendatang</span>
               </div>
               <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 space-y-4">
-                {mockJadwal.map((jadwal) => (
-                  <div key={jadwal.id} className="flex items-center gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
-                    <div className="w-12 h-12 rounded-full bg-linear-to-br from-yellow-400 to-orange-500 flex items-center justify-center shrink-0">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold">{jadwal.name}</h3>
-                      <p className="text-blue-200 text-sm">{jadwal.day}, {jadwal.time}</p>
-                    </div>
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
                   </div>
-                ))}
+                ) : jadwalData.length === 0 ? (
+                  <p className="text-white/70 text-center py-4">Belum ada jadwal ibadah</p>
+                ) : (
+                  jadwalData.map((jadwal) => (
+                    <div key={jadwal.id} className="flex items-center gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                      <div className="w-12 h-12 rounded-full bg-linear-to-br from-yellow-400 to-orange-500 flex items-center justify-center shrink-0">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold">{jadwal.name}</h3>
+                        <p className="text-blue-200 text-sm">{jadwal.day}, {jadwal.time}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
                 <Link href="/jadwal" className="block text-center text-blue-300 hover:text-white text-sm font-medium mt-4 transition-colors">
                   Lihat semua jadwal →
                 </Link>
@@ -174,22 +233,28 @@ export default function Home() {
             <p className="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-2">Ibadah</p>
             <h2 className="text-2xl font-bold text-(--text-primary)">Jadwal Ibadah</h2>
           </div>
-          <div className="space-y-4">
-            {mockJadwal.map((jadwal) => (
-              <div key={jadwal.id} className="flex items-center gap-4 p-4 bg-(--bg-secondary) rounded-xl">
-                <div className="w-12 h-12 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center shrink-0">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {jadwalData.map((jadwal) => (
+                <div key={jadwal.id} className="flex items-center gap-4 p-4 bg-(--bg-secondary) rounded-xl">
+                  <div className="w-12 h-12 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-(--text-primary)">{jadwal.name}</h3>
+                    <p className="text-blue-600 text-sm font-medium">{jadwal.day}, {jadwal.time}</p>
+                    <p className="text-(--text-secondary) text-xs">{jadwal.location}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-(--text-primary)">{jadwal.name}</h3>
-                  <p className="text-blue-600 text-sm font-medium">{jadwal.day}, {jadwal.time}</p>
-                  <p className="text-(--text-secondary) text-xs">{jadwal.location}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
           <div className="text-center mt-6">
             <Link href="/jadwal" className="text-blue-600 font-semibold text-sm hover:underline">
               Lihat semua jadwal →
@@ -211,28 +276,38 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {mockWarta.map((warta) => (
-              <Link 
-                key={warta.id} 
-                href={`/warta/${warta.id}`} 
-                className="group block bg-(--bg-secondary) rounded-2xl overflow-hidden border border-(--border) hover:shadow-xl hover:border-blue-200 transition-all duration-300"
-              >
-                <div className="h-48 bg-linear-to-br from-blue-100 to-purple-100 flex items-center justify-center relative overflow-hidden">
-                  <svg className="w-16 h-16 text-blue-300 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                  </svg>
-                </div>
-                <div className="p-6">
-                  <p className="text-sm text-(--text-muted) mb-2 font-medium">{warta.date}</p>
-                  <h3 className="font-bold text-(--text-primary) text-lg mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
-                    {warta.title}
-                  </h3>
-                  <p className="text-(--text-secondary) text-sm line-clamp-2">{warta.excerpt}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+            </div>
+          ) : wartaData.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-(--text-secondary)">Belum ada warta jemaat</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {wartaData.map((warta) => (
+                <Link 
+                  key={warta.id} 
+                  href={`/warta/${warta.id}`} 
+                  className="group block bg-(--bg-secondary) rounded-2xl overflow-hidden border border-(--border) hover:shadow-xl hover:border-blue-200 transition-all duration-300"
+                >
+                  <div className="h-48 bg-linear-to-br from-blue-100 to-purple-100 flex items-center justify-center relative overflow-hidden">
+                    <svg className="w-16 h-16 text-blue-300 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                  </div>
+                  <div className="p-6">
+                    <p className="text-sm text-(--text-muted) mb-2 font-medium">{formatDate(warta.created_at)}</p>
+                    <h3 className="font-bold text-(--text-primary) text-lg mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      {warta.title}
+                    </h3>
+                    <p className="text-(--text-secondary) text-sm line-clamp-2">{warta.excerpt || 'Klik untuk baca selengkapnya...'}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-10">
             <Link 
@@ -264,28 +339,38 @@ export default function Home() {
             </Link>
           </div>
           
-          <div className="space-y-4">
-            {mockPengumuman.map((item) => (
-              <div 
-                key={item.id} 
-                className="flex flex-col sm:flex-row sm:items-center gap-4 p-6 bg-(--bg-primary) rounded-2xl border border-(--border) hover:shadow-lg hover:border-blue-100 transition-all"
-              >
-                <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold shrink-0 w-fit ${
-                  item.priority === 'urgent' 
-                    ? 'bg-red-100 text-red-700' 
-                    : item.priority === 'important' 
-                    ? 'bg-amber-100 text-amber-700' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {item.priority === 'urgent' ? '🔴 Mendesak' : item.priority === 'important' ? '🟡 Penting' : 'ℹ️ Info'}
-                </span>
-                <div className="flex-1">
-                  <h3 className="font-bold text-(--text-primary) text-lg">{item.title}</h3>
-                  <p className="text-(--text-secondary) mt-1">{item.content}</p>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full"></div>
+            </div>
+          ) : pengumumanData.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-(--text-secondary)">Belum ada pengumuman</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {pengumumanData.map((item) => (
+                <div 
+                  key={item.id} 
+                  className="flex flex-col sm:flex-row sm:items-center gap-4 p-6 bg-(--bg-primary) rounded-2xl border border-(--border) hover:shadow-lg hover:border-blue-100 transition-all"
+                >
+                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold shrink-0 w-fit ${
+                    item.priority === 'urgent' 
+                      ? 'bg-red-100 text-red-700' 
+                      : item.priority === 'important' 
+                      ? 'bg-amber-100 text-amber-700' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {item.priority === 'urgent' ? '🔴 Mendesak' : item.priority === 'important' ? '🟡 Penting' : 'ℹ️ Info'}
+                  </span>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-(--text-primary) text-lg">{item.title}</h3>
+                    <p className="text-(--text-secondary) mt-1">{item.content}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

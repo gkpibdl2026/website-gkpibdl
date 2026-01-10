@@ -39,7 +39,9 @@ Buka http://localhost:3000
 - **CRUD Pengumuman** - Kelola pengumuman
 - **CRUD Keuangan** - Kelola laporan keuangan
 - **CRUD Jadwal** - Kelola jadwal ibadah
-- **Dark Theme** - Tampilan admin dengan tema biru gelap
+- **CRUD Jadwal** - Kelola jadwal ibadah
+- **Hybrid Theme** - Sidebar tetap gelap, konten adaptif (Light/Dark mode)
+- **High Contrast UI** - Teks dan tombol dioptimalkan untuk keterbacaan
 
 ## 🛠️ Tech Stack
 
@@ -188,13 +190,25 @@ Atau push ke GitHub dan connect di [vercel.com](https://vercel.com)
 - `/admin/jadwal/new` - Tambah jadwal
 - `/admin/jadwal/[id]/edit` - Edit jadwal
 
-## 🎨 Theme Admin
+Dashboard admin menggunakan desain **Hybrid Responsif** yang mengutamakan keterbacaan dan estetika:
 
-Dashboard admin menggunakan tema dark blue:
+### 1. Sidebar Navigation
 
-- Background: `#1e3a5f`
-- Border: `#2d4a6f`
-- Text: `text-white` / `text-gray-300`
+- **Style**: Tetap menggunakan warna biru gelap (`#1e3a5f`) baik di mode terang maupun gelap.
+- **Text**: Selalu putih (`text-white`) untuk kontras maksimal.
+- **Active State**: Highlight halus dengan background transparan.
+
+### 2. Main Content Area
+
+- **Light Mode**: Background putih bersih dengan teks hitam/abu-abu gelap.
+- **Dark Mode**: Background abu-abu gelap (`#111827`) dengan teks putih/abu-abu terang.
+- **Cards**: Menggunakan background menyesuaikan mode dengan border halus.
+
+### 3. Komponen UI
+
+- **Buttons**: Tombol aksi utama ("Tambah") menggunakan warna solid dengan teks **putih** (`text-white!`) untuk visibilitas jelas.
+- **Headings**: Judul halaman ("Selamat Datang", dll) beradaptasi warna (Hitam di Light, Putih di Dark).
+- **Icons**: Ikon sidebar konsisten mengikuti warna teks.
 
 ---
 

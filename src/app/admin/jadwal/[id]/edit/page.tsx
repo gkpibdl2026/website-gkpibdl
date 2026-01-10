@@ -2,13 +2,16 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { useNotification } from '@/context/NotificationContext'
 
 const daysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 
 export default function EditJadwal() {
   const params = useParams()
   const id = params.id as string
+  const router = useRouter()
+  const { showToast } = useNotification()
   
   const [formData, setFormData] = useState({
     name: '',
@@ -57,13 +60,13 @@ export default function EditJadwal() {
       })
       
       if (res.ok) {
-        alert('Jadwal berhasil diupdate!')
-        window.location.href = '/admin/jadwal'
+        showToast('Jadwal berhasil diupdate!', 'success')
+        router.push('/admin/jadwal')
       } else {
         throw new Error('Failed')
       }
     } catch {
-      alert('Gagal mengupdate jadwal')
+      showToast('Gagal mengupdate jadwal', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -90,27 +93,27 @@ export default function EditJadwal() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Nama Ibadah</label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama Ibadah</label>
             <input
               type="text"
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
               required
             />
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <label htmlFor="day" className="block text-sm font-medium text-gray-700 mb-2">Hari</label>
+              <label htmlFor="day" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Hari</label>
               <select
                 id="day"
                 value={formData.day}
                 onChange={(e) => setFormData({ ...formData, day: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-white"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 required
               >
                 {daysOfWeek.map((day) => (
@@ -119,13 +122,13 @@ export default function EditJadwal() {
               </select>
             </div>
             <div>
-              <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">Waktu</label>
+              <label htmlFor="time" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Waktu</label>
               <input
                 type="text"
                 id="time"
                 value={formData.time}
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
                 placeholder="07:00 WIB"
                 required
               />
@@ -133,24 +136,24 @@ export default function EditJadwal() {
           </div>
 
           <div>
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
+            <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Lokasi</label>
             <input
               type="text"
               id="location"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
             />
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Keterangan</label>
             <textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500 resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
             />
           </div>
 
@@ -162,16 +165,16 @@ export default function EditJadwal() {
               onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
               className="w-4 h-4"
             />
-            <label htmlFor="active" className="text-gray-700">Jadwal aktif</label>
+            <label htmlFor="active" className="text-gray-700 dark:text-gray-300">Jadwal aktif</label>
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-4">
-          <Link href="/admin/jadwal" className="px-6 py-3 text-gray-700 font-medium hover:bg-gray-100 rounded-xl">Batal</Link>
+          <Link href="/admin/jadwal" className="px-6 py-3 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">Batal</Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 disabled:opacity-50"
+            className="px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50"
           >
             {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
           </button>

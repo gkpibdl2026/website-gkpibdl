@@ -1,37 +1,101 @@
+'use client'
+
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 
-// Mock data for dashboard stats
-const stats = [
-  { label: 'Total Warta', value: 12, icon: 'newspaper', color: 'blue' },
-  { label: 'Pengumuman Aktif', value: 5, icon: 'megaphone', color: 'purple' },
-  { label: 'Jadwal Ibadah', value: 7, icon: 'calendar', color: 'green' },
-  { label: 'Laporan Keuangan', value: 8, icon: 'currency', color: 'amber' },
-]
+interface Warta {
+  id: string
+  title: string
+  created_at: string
+  published: boolean
+}
 
-const recentWarta = [
-  { id: 1, title: 'Renungan Minggu: Kasih yang Sejati', date: '6 Jan 2026', status: 'Published' },
-  { id: 2, title: 'Perayaan Natal 2025', date: '25 Des 2025', status: 'Published' },
-  { id: 3, title: 'Draft: Kegiatan Tahun Baru', date: '1 Jan 2026', status: 'Draft' },
-]
+interface Stats {
+  totalWarta: number
+  totalPengumuman: number
+  totalJadwal: number
+  totalKeuangan: number
+}
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState<Stats>({
+    totalWarta: 0,
+    totalPengumuman: 0,
+    totalJadwal: 0,
+    totalKeuangan: 0,
+  })
+  const [recentWarta, setRecentWarta] = useState<Warta[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
+
+  const fetchDashboardData = async () => {
+    try {
+      const [wartaRes, pengumumanRes, jadwalRes, keuanganRes] = await Promise.all([
+        fetch('/api/warta'),
+        fetch('/api/pengumuman'),
+        fetch('/api/jadwal'),
+        fetch('/api/keuangan'),
+      ])
+
+      if (wartaRes.ok) {
+        const { data } = await wartaRes.json()
+        setStats(prev => ({ ...prev, totalWarta: data?.length || 0 }))
+        setRecentWarta((data || []).slice(0, 3))
+      }
+      if (pengumumanRes.ok) {
+        const { data } = await pengumumanRes.json()
+        setStats(prev => ({ ...prev, totalPengumuman: data?.length || 0 }))
+      }
+      if (jadwalRes.ok) {
+        const { data } = await jadwalRes.json()
+        setStats(prev => ({ ...prev, totalJadwal: data?.length || 0 }))
+      }
+      if (keuanganRes.ok) {
+        const { data } = await keuanganRes.json()
+        setStats(prev => ({ ...prev, totalKeuangan: data?.length || 0 }))
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    })
+  }
+
+  const statCards = [
+    { label: 'Total Warta', value: stats.totalWarta, icon: 'newspaper', color: 'blue' },
+    { label: 'Pengumuman Aktif', value: stats.totalPengumuman, icon: 'megaphone', color: 'purple' },
+    { label: 'Jadwal Ibadah', value: stats.totalJadwal, icon: 'calendar', color: 'green' },
+    { label: 'Laporan Keuangan', value: stats.totalKeuangan, icon: 'currency', color: 'amber' },
+  ]
+
   return (
     <div className="space-y-8">
       {/* Welcome */}
       <div>
-        <h2 className="text-2xl font-bold text-white">Selamat Datang, Admin!</h2>
-        <p className="text-gray-300 mt-1">Kelola konten website GKPI Bandar Lampung dari sini.</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Selamat Datang, Admin!</h2>
+        <p className="text-gray-600 dark:text-gray-300 mt-1">Kelola konten website GKPI Bandar Lampung dari sini.</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        {statCards.map((stat, index) => (
+          <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
             <div className={`w-12 h-12 rounded-xl mb-4 flex items-center justify-center ${
-              stat.color === 'blue' ? 'bg-blue-100 text-blue-600' :
-              stat.color === 'purple' ? 'bg-purple-100 text-purple-600' :
-              stat.color === 'green' ? 'bg-green-100 text-green-600' :
-              'bg-amber-100 text-amber-600'
+              stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' :
+              stat.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400' :
+              stat.color === 'green' ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' :
+              'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400'
             }`}>
               {stat.icon === 'newspaper' && (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,8 +118,17 @@ export default function AdminDashboard() {
                 </svg>
               )}
             </div>
-            <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-            <p className="text-gray-500 text-sm mt-1">{stat.label}</p>
+            {isLoading ? (
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+                <div className="h-4 bg-gray-100 dark:bg-gray-600 rounded w-24"></div>
+              </div>
+            ) : (
+              <>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                <p className="text-gray-700 dark:text-white text-sm mt-1">{stat.label}</p>
+              </>
+            )}
           </div>
         ))}
       </div>
@@ -63,76 +136,94 @@ export default function AdminDashboard() {
       {/* Quick Actions */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Recent Warta */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">Warta Terbaru</h3>
-            <Link href="/admin/warta" className="text-sm text-blue-600 font-medium hover:underline">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+          <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <h3 className="font-semibold text-gray-900 dark:text-white">Warta Terbaru</h3>
+            <Link href="/admin/warta" className="text-sm text-blue-600 dark:text-blue-400 font-medium hover:underline">
               Lihat Semua
             </Link>
           </div>
-          <div className="divide-y divide-gray-100">
-            {recentWarta.map((warta) => (
-              <div key={warta.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                <div>
-                  <p className="font-medium text-gray-900 text-sm">{warta.title}</p>
-                  <p className="text-gray-500 text-xs mt-1">{warta.date}</p>
-                </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                  warta.status === 'Published' 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {warta.status}
-                </span>
+          <div className="divide-y divide-gray-100 dark:divide-gray-700">
+            {isLoading ? (
+              <div className="p-4 space-y-3">
+                {[1,2,3].map(i => (
+                  <div key={i} className="animate-pulse flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-100 dark:bg-gray-600 rounded w-1/4"></div>
+                    </div>
+                    <div className="h-6 bg-gray-100 dark:bg-gray-600 rounded w-16"></div>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : recentWarta.length === 0 ? (
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                Belum ada warta
+              </div>
+            ) : (
+              recentWarta.map((warta) => (
+                <div key={warta.id} className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">{warta.title}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">{formatDate(warta.created_at)}</p>
+                  </div>
+                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                    warta.published 
+                      ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' 
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                  }`}>
+                    {warta.published ? 'Published' : 'Draft'}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
         {/* Quick Links */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Aksi Cepat</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Aksi Cepat</h3>
           <div className="grid gap-3">
             <Link 
               href="/admin/warta/new" 
-              className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-blue-200 hover:bg-blue-50 transition-colors"
+              className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
             >
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-gray-900 text-sm">Tambah Warta Baru</p>
-                <p className="text-gray-500 text-xs">Buat berita atau renungan baru</p>
+                <p className="font-medium text-gray-900 dark:text-white text-sm">Tambah Warta Baru</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs">Buat berita atau renungan baru</p>
               </div>
             </Link>
             <Link 
               href="/admin/pengumuman/new" 
-              className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-colors"
+              className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-600 hover:border-purple-200 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
             >
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
+                <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-gray-900 text-sm">Tambah Pengumuman</p>
-                <p className="text-gray-500 text-xs">Buat pengumuman untuk jemaat</p>
+                <p className="font-medium text-gray-900 dark:text-white text-sm">Tambah Pengumuman</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs">Buat pengumuman untuk jemaat</p>
               </div>
             </Link>
             <Link 
               href="/admin/keuangan/new" 
-              className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-amber-200 hover:bg-amber-50 transition-colors"
+              className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-600 hover:border-amber-200 dark:hover:border-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
             >
-              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-gray-900 text-sm">Tambah Laporan Keuangan</p>
-                <p className="text-gray-500 text-xs">Upload laporan keuangan bulanan</p>
+                <p className="font-medium text-gray-900 dark:text-white text-sm">Tambah Laporan Keuangan</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs">Upload laporan keuangan bulanan</p>
               </div>
             </Link>
           </div>

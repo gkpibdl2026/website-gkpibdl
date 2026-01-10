@@ -6,6 +6,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const visible = searchParams.get('visible')
+    const limit = searchParams.get('limit')
 
     let query = supabaseAdmin
       .from('pengumuman')
@@ -14,6 +15,10 @@ export async function GET(request: Request) {
 
     if (visible === 'true') {
       query = query.eq('visible', true)
+    }
+
+    if (limit) {
+      query = query.limit(parseInt(limit))
     }
 
     const { data, error } = await query

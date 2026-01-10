@@ -1,14 +1,46 @@
-import Link from "next/link";
+'use client'
 
-const pengumumanData = [
-  { id: 1, title: "Pendaftaran Sekolah Minggu Tahun Ajaran Baru", content: "Pendaftaran Sekolah Minggu tahun ajaran baru telah dibuka. Segera daftarkan putra-putri Anda di sekretariat gereja. Formulir pendaftaran tersedia mulai hari Minggu.", priority: "important", date: "6 Jan 2026" },
-  { id: 2, title: "Latihan Paduan Suara", content: "Latihan paduan suara rutin setiap Sabtu pukul 15.00 WIB di ruang musik. Terbuka untuk semua jemaat yang ingin melayani dalam bidang musik.", priority: "normal", date: "5 Jan 2026" },
-  { id: 3, title: "Ibadah Tahun Baru 2026", content: "Ibadah syukur tahun baru akan dilaksanakan pada 1 Januari 2026 pukul 10.00 WIB. Mari bersyukur bersama untuk tahun yang baru.", priority: "important", date: "28 Des 2025" },
-  { id: 4, title: "Persembahan Khusus untuk Korban Bencana", content: "Gereja membuka persembahan khusus untuk membantu saudara-saudara kita yang terkena bencana. Persembahan dapat diserahkan melalui bendahara gereja.", priority: "urgent", date: "20 Des 2025" },
-  { id: 5, title: "Jadwal Konseling Pendeta", content: "Konseling dengan pendeta tersedia setiap Selasa dan Kamis pukul 09.00-12.00 WIB. Silakan hubungi sekretariat untuk membuat janji.", priority: "normal", date: "15 Des 2025" },
-];
+import Link from "next/link";
+import { useState, useEffect } from "react";
+
+interface Pengumuman {
+  id: string;
+  title: string;
+  content: string;
+  priority: string;
+  created_at: string;
+}
 
 export default function PengumumanPage() {
+  const [pengumumanData, setPengumumanData] = useState<Pengumuman[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPengumuman();
+  }, []);
+
+  const fetchPengumuman = async () => {
+    try {
+      const res = await fetch('/api/pengumuman?visible=true');
+      if (res.ok) {
+        const { data } = await res.json();
+        setPengumumanData(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching pengumuman:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
   return (
     <>
       {/* Header */}
@@ -30,37 +62,47 @@ export default function PengumumanPage() {
       {/* Pengumuman List */}
       <section className="py-16 md:py-24 bg-white">
         <div className="container max-w-4xl">
-          <div className="space-y-6">
-            {pengumumanData.map((item) => (
-              <div 
-                key={item.id}
-                className={`p-6 rounded-2xl border-l-4 bg-white shadow-sm hover:shadow-lg transition-all ${
-                  item.priority === 'urgent' 
-                    ? 'border-l-red-500 bg-red-50/30' 
-                    : item.priority === 'important' 
-                    ? 'border-l-amber-500 bg-amber-50/30' 
-                    : 'border-l-gray-300'
-                }`}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold shrink-0 w-fit ${
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full"></div>
+            </div>
+          ) : pengumumanData.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">Belum ada pengumuman.</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {pengumumanData.map((item) => (
+                <div 
+                  key={item.id}
+                  className={`p-6 rounded-2xl border-l-4 bg-white shadow-sm hover:shadow-lg transition-all ${
                     item.priority === 'urgent' 
-                      ? 'bg-red-100 text-red-700' 
+                      ? 'border-l-red-500 bg-red-50/30' 
                       : item.priority === 'important' 
-                      ? 'bg-amber-100 text-amber-700' 
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {item.priority === 'urgent' ? '🔴 Mendesak' : item.priority === 'important' ? '🟡 Penting' : 'ℹ️ Info'}
-                  </span>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-400 mb-2">{item.date}</p>
-                    <h3 className="font-bold text-gray-900 text-xl mb-3">{item.title}</h3>
-                    <p className="text-gray-600 leading-relaxed">{item.content}</p>
+                      ? 'border-l-amber-500 bg-amber-50/30' 
+                      : 'border-l-gray-300'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                    <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold shrink-0 w-fit ${
+                      item.priority === 'urgent' 
+                        ? 'bg-red-100 text-red-700' 
+                        : item.priority === 'important' 
+                        ? 'bg-amber-100 text-amber-700' 
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {item.priority === 'urgent' ? '🔴 Mendesak' : item.priority === 'important' ? '🟡 Penting' : 'ℹ️ Info'}
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-400 mb-2">{formatDate(item.created_at)}</p>
+                      <h3 className="font-bold text-gray-900 text-xl mb-3">{item.title}</h3>
+                      <p className="text-gray-600 leading-relaxed">{item.content}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </>

@@ -2,11 +2,14 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { useNotification } from '@/context/NotificationContext'
 
 export default function EditPengumuman() {
   const params = useParams()
   const id = params.id as string
+  const router = useRouter()
+  const { showToast } = useNotification()
   
   const [formData, setFormData] = useState({
     title: '',
@@ -53,13 +56,13 @@ export default function EditPengumuman() {
       })
       
       if (res.ok) {
-        alert('Pengumuman berhasil diupdate!')
-        window.location.href = '/admin/pengumuman'
+        showToast('Pengumuman berhasil diupdate!', 'success')
+        router.push('/admin/pengumuman')
       } else {
         throw new Error('Failed')
       }
     } catch {
-      alert('Gagal mengupdate pengumuman')
+      showToast('Gagal mengupdate pengumuman', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -86,33 +89,33 @@ export default function EditPengumuman() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">Judul</label>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Judul</label>
             <input
               type="text"
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">Isi</label>
+            <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Isi</label>
             <textarea
               id="content"
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               rows={6}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 resize-none"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Prioritas</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prioritas</label>
             <div className="flex gap-4">
               {['normal', 'important', 'urgent'].map((p) => (
                 <label key={p} className="flex items-center gap-2 cursor-pointer">
@@ -124,20 +127,20 @@ export default function EditPengumuman() {
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                     className="w-4 h-4"
                   />
-                  <span className="capitalize">{p === 'normal' ? 'Info' : p === 'important' ? 'Penting' : 'Mendesak'}</span>
+                  <span className="capitalize text-gray-700 dark:text-gray-300">{p === 'normal' ? 'Info' : p === 'important' ? 'Penting' : 'Mendesak'}</span>
                 </label>
               ))}
             </div>
           </div>
 
           <div>
-            <label htmlFor="expires" className="block text-sm font-medium text-gray-700 mb-2">Tanggal Kadaluarsa</label>
+            <label htmlFor="expires" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tanggal Kadaluarsa</label>
             <input
               type="date"
               id="expires"
               value={formData.expires_at}
               onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
 
@@ -149,16 +152,16 @@ export default function EditPengumuman() {
               onChange={(e) => setFormData({ ...formData, visible: e.target.checked })}
               className="w-4 h-4"
             />
-            <label htmlFor="visible" className="text-gray-700">Tampilkan di website</label>
+            <label htmlFor="visible" className="text-gray-700 dark:text-gray-300">Tampilkan di website</label>
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-4">
-          <Link href="/admin/pengumuman" className="px-6 py-3 text-gray-700 font-medium hover:bg-gray-100 rounded-xl">Batal</Link>
+          <Link href="/admin/pengumuman" className="px-6 py-3 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">Batal</Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-3 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-700 disabled:opacity-50"
+            className="px-6 py-3 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-50"
           >
             {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
           </button>
