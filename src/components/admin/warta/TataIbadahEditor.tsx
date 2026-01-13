@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { TataIbadahItem } from '@/lib/supabase'
 import SongSelector from './SongSelector'
+import SongVersesSelector from './SongVersesSelector'
 
 interface Props {
   data: { items: TataIbadahItem[] }
@@ -310,16 +311,30 @@ export default function TataIbadahEditor({ data, onUpdate }: Props) {
                              })}
                            />
                          ) : (
-                           <div className="flex items-center justify-between bg-white dark:bg-gray-800 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
-                             <span className="font-medium text-blue-900 dark:text-blue-100 text-sm">
-                               {item.content || 'Lagu Terpilih'}
-                             </span>
-                             <button
-                               onClick={() => handleUpdateItem(item.id, { songId: undefined, content: undefined })}
-                               className="text-xs text-red-500 hover:text-red-700 underline"
-                             >
-                               Ganti Lagu
-                             </button>
+                           <div className="space-y-4">
+                             <div className="flex items-center justify-between bg-white dark:bg-gray-800 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
+                               <span className="font-medium text-blue-900 dark:text-blue-100 text-sm">
+                                 {item.content || 'Lagu Terpilih'}
+                               </span>
+                               <button
+                                 onClick={() => handleUpdateItem(item.id, { songId: undefined, content: undefined, songVerses: [] })}
+                                 className="text-xs text-red-500 hover:text-red-700 underline"
+                               >
+                                 Ganti Lagu
+                               </button>
+                             </div>
+                             
+                             {/* Verse Selector */}
+                             {item.songId && (
+                               <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
+                                 <label className="block text-xs font-medium text-gray-500 mb-2">Pilih Ayat (Opsional)</label>
+                                 <SongVersesSelector 
+                                   songId={item.songId}
+                                   selectedVerses={item.songVerses || []}
+                                   onChange={(verses) => handleUpdateItem(item.id, { songVerses: verses })}
+                                 />
+                               </div>
+                             )}
                            </div>
                          )}
                        </div>

@@ -97,7 +97,19 @@ export default function PrintWarta() {
   }
 
   return (
-    <div className="bg-white min-h-screen text-black font-serif print:p-0 p-8 max-w-[210mm] mx-auto">
+    <>
+      <style jsx global>{`
+        @media print {
+          @page {
+            margin: 0;
+            size: auto;
+          }
+          body {
+            -webkit-print-color-adjust: exact;
+          }
+        }
+      `}</style>
+      <div className="bg-white min-h-screen text-black font-serif print:p-8 p-8 max-w-[210mm] mx-auto print:max-w-none w-full">
       {/* Print Controls */}
       <div className="print:hidden mb-8 flex items-center justify-between bg-gray-100 p-4 rounded-lg">
         <div>
@@ -124,19 +136,10 @@ export default function PrintWarta() {
            <div className="w-24 h-24 shrink-0 flex items-center justify-center">
              {/* eslint-disable-next-line @next/next/no-img-element */}
              <img 
-               src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Logo_GKPI.jpg" 
+               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuFEWaYkeWEHQWvnpP9dqaCtdKEZOFnBmtLg&s" 
                alt="Logo GKPI" 
                className="w-full h-full object-contain"
-               onError={(e) => {
-                 (e.target as HTMLImageElement).style.display = 'none';
-                 (e.target as HTMLImageElement).nextElementSibling!.classList.remove('hidden');
-               }}
              />
-             <div className="hidden">
-               <div className="w-24 h-24 border-2 border-gray-400 rounded-full flex items-center justify-center text-center text-xs font-bold text-gray-500">
-                 Logo GKPI
-               </div>
-             </div>
            </div>
 
            {/* Header Text */}
@@ -212,8 +215,9 @@ export default function PrintWarta() {
                         {/* If linked song exists */}
                         {linkedLyrics && (
                           <div className="mt-2 pl-0 space-y-2">
-                             {/* Print all verses for liturgy items, or maybe specific ones if we had selection? Default all for now */}
-                             {linkedLyrics.map(l => (
+                             {linkedLyrics
+                               .filter(l => !item.songVerses || item.songVerses.length === 0 || item.songVerses.includes(l.verse))
+                               .map(l => (
                                <div key={l.verse} className="flex gap-2 text-sm">
                                  <span className="font-bold w-4">{l.verse}.</span>
                                  <p className="whitespace-pre-line leading-relaxed">{l.content}</p>
@@ -239,5 +243,6 @@ export default function PrintWarta() {
         Dicetak dari Sistem Informasi Warta GKPI Bandar Lampung
       </div>
     </div>
+    </>
   )
 }

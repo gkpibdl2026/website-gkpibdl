@@ -71,6 +71,7 @@ export interface TataIbadahItem {
   description?: string
   content?: string
   songId?: string
+  songVerses?: number[]
 }
 
 export interface Pengumuman {

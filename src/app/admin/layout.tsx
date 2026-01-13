@@ -106,7 +106,7 @@ export default function AdminLayout({
 
       {/* Sidebar - Desktop & Mobile Drawer */}
       <aside 
-        className={`fixed inset-y-0 left-0 w-64 bg-[#1e3a5f] dark:bg-gray-800 border-r border-[#2d4a6f] dark:border-gray-700 z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 w-64 bg-[#1e3a5f] dark:bg-gray-800 border-r border-[#2d4a6f] dark:border-gray-700 z-50 transform transition-transform duration-300 ease-in-out print:hidden ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
       >
@@ -183,9 +183,9 @@ export default function AdminLayout({
       </aside>
 
       {/* Main Content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-64 print:pl-0 print:w-full">
         {/* Top Bar */}
-        <header className="h-14 md:h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-2 md:px-6 sticky top-0 z-10">
+        <header className="h-14 md:h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-2 md:px-6 sticky top-0 z-10 print:hidden">
           <div className="flex items-center gap-1 md:gap-4 min-w-0 flex-1">
             {/* Mobile menu button */}
             <button 
@@ -209,14 +209,16 @@ export default function AdminLayout({
         </header>
 
         {/* Page Content */}
-        <main className="p-4 md:p-6 pb-20 lg:pb-6 bg-gray-50 dark:bg-gray-900 min-h-[calc(100vh-56px)] md:min-h-[calc(100vh-64px)]">
-          <Breadcrumb />
+        <main className="p-4 md:p-6 pb-20 lg:pb-6 bg-gray-50 dark:bg-gray-900 min-h-[calc(100vh-56px)] md:min-h-[calc(100vh-64px)] print:p-0 print:bg-white">
+          <div className="print:hidden">
+            <Breadcrumb />
+          </div>
           {children}
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#1e3a5f] dark:bg-gray-800 border-t border-[#2d4a6f] dark:border-gray-700 flex justify-around items-center h-14 lg:hidden z-30 px-1">
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#1e3a5f] dark:bg-gray-800 border-t border-[#2d4a6f] dark:border-gray-700 flex justify-around items-center h-14 lg:hidden z-30 px-1 print:hidden">
         {sidebarItems.slice(0, 5).map((item) => (
           <Link
             key={item.href}
