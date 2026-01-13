@@ -40,10 +40,11 @@ export async function PUT(request: Request, { params }: Params) {
       .from('warta')
       .update({
         title: body.title,
-        content: body.content,
-        excerpt: body.excerpt,
+        date: body.date,
+        minggu_name: body.minggu_name,
         image_url: body.image_url,
         published: body.published,
+        modules: body.modules,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)

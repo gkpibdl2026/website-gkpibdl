@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useNotification } from '@/context/NotificationContext'
+import WartaModuleBuilder from '@/components/admin/warta/WartaModuleBuilder'
+import { WartaModule } from '@/lib/supabase'
 
 export default function EditWarta() {
   const params = useParams()
@@ -13,9 +15,10 @@ export default function EditWarta() {
   
   const [formData, setFormData] = useState({
     title: '',
-    content: '',
-    excerpt: '',
+    date: '',
+    minggu_name: '',
     published: false,
+    modules: [] as WartaModule[],
   })
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -29,19 +32,21 @@ export default function EditWarta() {
           const { data } = await res.json()
           setFormData({
             title: data.title || '',
-            content: data.content || '',
-            excerpt: data.excerpt || '',
+            date: data.date || '',
+            minggu_name: data.minggu_name || '',
             published: data.published || false,
+            modules: data.modules || [],
           })
         }
       } catch (error) {
         console.error('Error fetching warta:', error)
+        showToast('Gagal memuat data warta', 'error')
       } finally {
         setIsLoading(false)
       }
     }
     fetchData()
-  }, [id])
+  }, [id, showToast])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -104,30 +109,40 @@ export default function EditWarta() {
             />
           </div>
 
-          <div>
-            <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Ringkasan
-            </label>
-            <textarea
-              id="excerpt"
-              value={formData.excerpt}
-              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-              rows={2}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Tanggal <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                id="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="minggu_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Nama Minggu <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="minggu_name"
+                value={formData.minggu_name}
+                onChange={(e) => setFormData({ ...formData, minggu_name: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
+                required
+              />
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Konten <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              rows={12}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
-              required
+          <div className="pt-6 border-t border-gray-100 dark:border-gray-700">
+            <WartaModuleBuilder 
+              modules={formData.modules}
+              onChange={(modules) => setFormData({ ...formData, modules })}
             />
           </div>
 

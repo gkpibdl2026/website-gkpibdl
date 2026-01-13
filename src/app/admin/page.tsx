@@ -19,7 +19,7 @@ interface Stats {
 }
 
 // Function to extract name from email and capitalize each word
-const getNameFromEmail = (email: string | undefined): string => {
+const getNameFromEmail = (email: string | null | undefined): string => {
   if (!email) return 'Admin'
   
   // Get part before @

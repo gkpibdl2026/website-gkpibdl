@@ -47,10 +47,11 @@ export async function POST(request: Request) {
     const newWarta: Partial<Warta> = {
       title: body.title,
       slug,
-      content: body.content,
-      excerpt: body.excerpt || null,
+      date: body.date,
+      minggu_name: body.minggu_name,
       image_url: body.image_url || null,
       published: body.published || false,
+      modules: body.modules || [],
     }
 
     const { data, error } = await supabaseAdmin

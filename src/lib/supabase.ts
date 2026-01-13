@@ -17,13 +17,50 @@ export interface Warta {
   id: string
   title: string
   slug: string
-  content: string
-  excerpt?: string
+  date: string
+  minggu_name: string
   image_url?: string
   author_id?: string
   published: boolean
+  modules?: WartaModule[]
   created_at: string
   updated_at: string
+}
+
+export type SongCategory = 'KJ' | 'PKJ' | 'NKB' | 'BE' | 'KK'
+
+export interface SongVerse {
+  verse: number
+  content: string
+}
+
+export interface Song {
+  id: string
+  title: string
+  song_number: string
+  category: SongCategory
+  lyrics: SongVerse[]
+  created_at: string
+  updated_at: string
+
+}
+
+export type ModuleType = 
+  | 'LAGU'
+  | 'AYAT'
+  | 'TATA_IBADAH'
+  | 'PELAYAN_IBADAH'
+  | 'PENGUMUMAN'
+  | 'STATISTIK'
+  | 'KEUANGAN'
+  | 'ULANG_TAHUN'
+  | 'JEMAAT_SAKIT'
+
+export interface WartaModule {
+  id: string
+  type: ModuleType
+  order: number
+  data: any // Akan disesuaikan dengan tipe spesifik tiap modul nanti
 }
 
 export interface Pengumuman {
