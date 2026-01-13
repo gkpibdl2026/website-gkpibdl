@@ -60,7 +60,7 @@ export default function PengumumanPage() {
       </section>
 
       {/* Pengumuman List */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-16 md:py-24 bg-white dark:bg-gray-900">
         <div className="container max-w-4xl">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -68,35 +68,35 @@ export default function PengumumanPage() {
             </div>
           ) : pengumumanData.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">Belum ada pengumuman.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-lg">Belum ada pengumuman.</p>
             </div>
           ) : (
             <div className="space-y-6">
               {pengumumanData.map((item) => (
                 <div 
                   key={item.id}
-                  className={`p-6 rounded-2xl border-l-4 bg-white shadow-sm hover:shadow-lg transition-all ${
+                  className={`p-6 rounded-2xl border-l-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-all ${
                     item.priority === 'urgent' 
-                      ? 'border-l-red-500 bg-red-50/30' 
+                      ? 'border-l-red-500 bg-red-50/30 dark:bg-red-900/20' 
                       : item.priority === 'important' 
-                      ? 'border-l-amber-500 bg-amber-50/30' 
-                      : 'border-l-gray-300'
+                      ? 'border-l-amber-500 bg-amber-50/30 dark:bg-amber-900/20' 
+                      : 'border-l-gray-300 dark:border-l-gray-600'
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                     <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold shrink-0 w-fit ${
                       item.priority === 'urgent' 
-                        ? 'bg-red-100 text-red-700' 
+                        ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' 
                         : item.priority === 'important' 
-                        ? 'bg-amber-100 text-amber-700' 
-                        : 'bg-gray-100 text-gray-600'
+                        ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300' 
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                     }`}>
                       {item.priority === 'urgent' ? '🔴 Mendesak' : item.priority === 'important' ? '🟡 Penting' : 'ℹ️ Info'}
                     </span>
                     <div className="flex-1">
-                      <p className="text-sm text-gray-400 mb-2">{formatDate(item.created_at)}</p>
-                      <h3 className="font-bold text-gray-900 text-xl mb-3">{item.title}</h3>
-                      <p className="text-gray-600 leading-relaxed">{item.content}</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">{formatDate(item.created_at)}</p>
+                      <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-3">{item.title}</h3>
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{item.content}</p>
                     </div>
                   </div>
                 </div>

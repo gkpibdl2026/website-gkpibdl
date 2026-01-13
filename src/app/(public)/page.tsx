@@ -200,7 +200,7 @@ export default function Home() {
               </div>
 
               <Link 
-                href="/kontak" 
+                href="/tentang" 
                 className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg"
               >
                 Kenali Lebih Dalam
@@ -403,7 +403,7 @@ export default function Home() {
               Kunjungi Kami
             </Link>
             <Link 
-              href="/keuangan" 
+              href="/keuangan#persembahan" 
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl hover:bg-white/20 transition-all"
             >
               Dukung Pelayanan Kami

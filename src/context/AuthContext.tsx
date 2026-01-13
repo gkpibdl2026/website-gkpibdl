@@ -1,62 +1,124 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { 
+  User,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  AuthError
+} from 'firebase/auth'
+import { auth, isFirebaseConfigured } from '@/lib/firebase'
 
-// Mock user type (tanpa Firebase)
-interface MockUser {
-  email: string
-  uid: string
+interface SignInResult {
+  success: boolean
+  error?: string
 }
 
 interface AuthContextType {
-  user: MockUser | null
+  user: User | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<void>
+  isConfigured: boolean
+  signIn: (email: string, password: string) => Promise<SignInResult>
+  signInWithGoogle: () => Promise<SignInResult>
   signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const AUTH_STORAGE_KEY = 'gkpi_admin_user'
+// Google Auth Provider
+const googleProvider = new GoogleAuthProvider()
+
+// Helper function to get user-friendly error messages
+function getAuthErrorMessage(error: AuthError): string {
+  switch (error.code) {
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+      return 'Email atau password salah'
+    case 'auth/too-many-requests':
+      return 'Terlalu banyak percobaan. Coba lagi nanti'
+    case 'auth/network-request-failed':
+      return 'Koneksi internet bermasalah'
+    case 'auth/invalid-email':
+      return 'Format email tidak valid'
+    case 'auth/user-disabled':
+      return 'Akun ini telah dinonaktifkan'
+    case 'auth/popup-closed-by-user':
+      return 'Login dibatalkan'
+    case 'auth/popup-blocked':
+      return 'Popup diblokir oleh browser. Izinkan popup untuk melanjutkan'
+    case 'auth/cancelled-popup-request':
+      return 'Proses login dibatalkan'
+    default:
+      return 'Terjadi kesalahan. Silakan coba lagi'
+  }
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<MockUser | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(null)
+  // Initialize loading as false if Firebase is not configured
+  const [loading, setLoading] = useState(isFirebaseConfigured)
 
-  // Load user from localStorage on mount
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem(AUTH_STORAGE_KEY)
-      if (storedUser) {
-        setUser(JSON.parse(storedUser))
-      }
-    } catch (error) {
-      console.error('Error loading auth state:', error)
-    } finally {
-      setLoading(false)
+    // If Firebase is not configured, don't try to listen for auth state
+    if (!isFirebaseConfigured) {
+      return
     }
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user)
+      setLoading(false)
+    })
+
+    return () => unsubscribe()
   }, [])
 
-  const signIn = async (email: string, password: string) => {
-    // Mock login - terima semua email/password untuk development
-    // TODO: Ganti dengan Firebase auth setelah config benar
-    if (email && password) {
-      const mockUser = { email, uid: 'mock-uid-123' }
-      setUser(mockUser)
-      // Persist to localStorage
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(mockUser))
-    } else {
-      throw new Error('Email dan password harus diisi')
+  const signIn = async (email: string, password: string): Promise<SignInResult> => {
+    if (!isFirebaseConfigured) {
+      return { success: false, error: 'Firebase belum dikonfigurasi. Hubungi administrator.' }
+    }
+    
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+      return { success: true }
+    } catch (error) {
+      const authError = error as AuthError
+      return { success: false, error: getAuthErrorMessage(authError) }
+    }
+  }
+
+  const signInWithGoogle = async (): Promise<SignInResult> => {
+    if (!isFirebaseConfigured) {
+      return { success: false, error: 'Firebase belum dikonfigurasi. Hubungi administrator.' }
+    }
+    
+    try {
+      await signInWithPopup(auth, googleProvider)
+      return { success: true }
+    } catch (error) {
+      const authError = error as AuthError
+      return { success: false, error: getAuthErrorMessage(authError) }
     }
   }
 
   const signOut = async () => {
-    setUser(null)
-    localStorage.removeItem(AUTH_STORAGE_KEY)
+    if (isFirebaseConfigured) {
+      await firebaseSignOut(auth)
+    }
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      isConfigured: isFirebaseConfigured,
+      signIn, 
+      signInWithGoogle, 
+      signOut 
+    }}>
       {children}
     </AuthContext.Provider>
   )

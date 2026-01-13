@@ -60,7 +60,7 @@ export default function WartaPage() {
       </section>
 
       {/* Warta List */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-16 md:py-24 bg-white dark:bg-gray-900">
         <div className="container">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -68,7 +68,7 @@ export default function WartaPage() {
             </div>
           ) : wartaData.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">Belum ada warta yang dipublikasikan.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-lg">Belum ada warta yang dipublikasikan.</p>
             </div>
           ) : (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -76,23 +76,23 @@ export default function WartaPage() {
                 <Link 
                   key={warta.id}
                   href={`/warta/${warta.id}`}
-                  className="group block bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl hover:border-blue-100 transition-all duration-300"
+                  className="group block bg-gray-50 dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 hover:shadow-xl hover:border-blue-100 dark:hover:border-blue-800 transition-all duration-300"
                 >
-                  <div className="h-48 bg-linear-to-br from-blue-100 to-purple-100 flex items-center justify-center relative overflow-hidden">
+                  <div className="h-48 bg-linear-to-br from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-purple-500/10 group-hover:opacity-0 transition-opacity"></div>
-                    <svg className="w-16 h-16 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-16 h-16 text-blue-300 dark:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                     </svg>
                   </div>
                   <div className="p-6">
-                    <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
+                    <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 mb-3">
                       <span>{formatDate(warta.created_at)}</span>
                     </div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+                    <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                       {warta.title}
                     </h3>
-                    <p className="text-gray-600 line-clamp-3">{warta.excerpt || 'Klik untuk membaca selengkapnya...'}</p>
-                    <p className="mt-4 text-blue-600 font-medium group-hover:underline">Baca selengkapnya →</p>
+                    <p className="text-gray-600 dark:text-gray-300 line-clamp-3">{warta.excerpt || 'Klik untuk membaca selengkapnya...'}</p>
+                    <p className="mt-4 text-blue-600 dark:text-blue-400 font-medium group-hover:underline">Baca selengkapnya →</p>
                   </div>
                 </Link>
               ))}

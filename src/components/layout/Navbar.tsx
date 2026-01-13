@@ -1,12 +1,14 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 const navItems = [
   { href: '/', label: 'Beranda' },
+  { href: '/tentang', label: 'Tentang' },
   { href: '/warta', label: 'Warta' },
   { href: '/jadwal', label: 'Jadwal' },
   { href: '/keuangan', label: 'Keuangan' },
@@ -40,9 +42,14 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg lg:text-xl">G</span>
-            </div>
+            <Image 
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuFEWaYkeWEHQWvnpP9dqaCtdKEZOFnBmtLg&s" 
+              alt="Logo GKPI"
+              width={48}
+              height={48}
+              className="w-10 h-10 lg:w-12 lg:h-12 rounded-full object-contain shadow-lg"
+              unoptimized
+            />
             <div>
               <p className="font-bold text-(--text-primary) text-sm lg:text-base leading-tight">GKPI</p>
               <p className="text-xs lg:text-sm text-(--text-secondary)">Bandar Lampung</p>

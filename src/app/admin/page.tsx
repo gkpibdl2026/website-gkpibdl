@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useAuth } from '@/context/AuthContext'
 
 interface Warta {
   id: string
@@ -17,7 +18,28 @@ interface Stats {
   totalKeuangan: number
 }
 
+// Function to extract name from email and capitalize each word
+const getNameFromEmail = (email: string | undefined): string => {
+  if (!email) return 'Admin'
+  
+  // Get part before @
+  const namePart = email.split('@')[0]
+  
+  // Replace dots, underscores, numbers with spaces
+  const cleaned = namePart.replace(/[._0-9]/g, ' ').trim()
+  
+  // Capitalize first letter of each word
+  const capitalized = cleaned
+    .split(' ')
+    .filter(word => word.length > 0)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+  
+  return capitalized || 'Admin'
+}
+
 export default function AdminDashboard() {
+  const { user } = useAuth()
   const [stats, setStats] = useState<Stats>({
     totalWarta: 0,
     totalPengumuman: 0,
@@ -26,6 +48,8 @@ export default function AdminDashboard() {
   })
   const [recentWarta, setRecentWarta] = useState<Warta[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  const userName = getNameFromEmail(user?.email)
 
   useEffect(() => {
     fetchDashboardData()
@@ -83,7 +107,7 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       {/* Welcome */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Selamat Datang, Admin!</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Selamat Datang, {userName}!</h2>
         <p className="text-gray-600 dark:text-gray-300 mt-1">Kelola konten website GKPI Bandar Lampung dari sini.</p>
       </div>
 

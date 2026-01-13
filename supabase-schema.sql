@@ -129,3 +129,128 @@ INSERT INTO jadwal_ibadah (name, day, time, location, description, sort_order) V
 -- Sample Pengumuman
 INSERT INTO pengumuman (title, content, priority) VALUES
 ('Selamat Datang di Website GKPI Bandar Lampung', 'Website resmi GKPI Bandar Lampung telah hadir. Dapatkan informasi terbaru seputar kegiatan gereja di sini.', 'important');
+
+-- =============================================
+-- 6. TABEL STRUKTUR ORGANISASI
+-- =============================================
+
+CREATE TABLE struktur_organisasi (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  position TEXT NOT NULL,
+  image_url TEXT,
+  description TEXT,
+  sort_order INTEGER DEFAULT 0,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE struktur_organisasi ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can read active struktur" ON struktur_organisasi
+  FOR SELECT USING (active = true);
+
+CREATE INDEX idx_struktur_active ON struktur_organisasi(active);
+CREATE INDEX idx_struktur_order ON struktur_organisasi(sort_order);
+
+-- =============================================
+-- 7. TABEL GALERI DOKUMENTASI
+-- =============================================
+
+CREATE TABLE galeri (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  category TEXT DEFAULT 'umum',
+  description TEXT,
+  event_date DATE,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE galeri ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can read active galeri" ON galeri
+  FOR SELECT USING (active = true);
+
+CREATE INDEX idx_galeri_active ON galeri(active);
+CREATE INDEX idx_galeri_category ON galeri(category);
+CREATE INDEX idx_galeri_date ON galeri(event_date DESC);
+
+-- =============================================
+-- ALBUM GALLERY SYSTEM
+-- Run this in Supabase SQL Editor
+-- =============================================
+
+-- 1. TABEL ALBUM (Kegiatan/Event)
+CREATE TABLE album (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT,
+  cover_image TEXT,
+  category TEXT DEFAULT 'umum',
+  event_date DATE,
+  photo_count INTEGER DEFAULT 0,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. TABEL ALBUM PHOTOS (Foto dalam Album)
+CREATE TABLE album_photos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  album_id UUID NOT NULL REFERENCES album(id) ON DELETE CASCADE,
+  image_url TEXT NOT NULL,
+  caption TEXT,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- ENABLE ROW LEVEL SECURITY
+-- =============================================
+
+ALTER TABLE album ENABLE ROW LEVEL SECURITY;
+ALTER TABLE album_photos ENABLE ROW LEVEL SECURITY;
+
+-- =============================================
+-- POLICIES - PUBLIC READ
+-- =============================================
+
+CREATE POLICY "Public can read active album" ON album
+  FOR SELECT USING (active = true);
+
+CREATE POLICY "Public can read album photos" ON album_photos
+  FOR SELECT USING (true);
+
+-- =============================================
+-- INDEXES FOR PERFORMANCE
+-- =============================================
+
+CREATE INDEX idx_album_active ON album(active);
+CREATE INDEX idx_album_category ON album(category);
+CREATE INDEX idx_album_date ON album(event_date DESC);
+CREATE INDEX idx_album_photos_album_id ON album_photos(album_id);
+CREATE INDEX idx_album_photos_order ON album_photos(sort_order);
+
+-- =============================================
+-- FUNCTION TO UPDATE PHOTO COUNT
+-- =============================================
+
+CREATE OR REPLACE FUNCTION update_album_photo_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE album SET photo_count = photo_count + 1, updated_at = NOW() WHERE id = NEW.album_id;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE album SET photo_count = photo_count - 1, updated_at = NOW() WHERE id = OLD.album_id;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_album_photo_count
+AFTER INSERT OR DELETE ON album_photos
+FOR EACH ROW EXECUTE FUNCTION update_album_photo_count();

@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 const footerLinks = [
+  { href: '/tentang', label: 'Tentang Kami' },
   { href: '/warta', label: 'Warta Jemaat' },
   { href: '/jadwal', label: 'Jadwal Ibadah' },
   { href: '/keuangan', label: 'Laporan Keuangan' },
@@ -48,9 +50,14 @@ export function Footer() {
           {/* About Section */}
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">G</span>
-              </div>
+              <Image 
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuFEWaYkeWEHQWvnpP9dqaCtdKEZOFnBmtLg&s" 
+                alt="Logo GKPI"
+                width={48}
+                height={48}
+                className="w-12 h-12 rounded-full object-contain shadow-lg"
+                unoptimized
+              />
               <div>
                 <h3 className="text-xl font-bold">GKPI Bandar Lampung</h3>
               </div>
@@ -111,7 +118,7 @@ export function Footer() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <span className="text-blue-200 text-sm">Jl. Contoh Alamat No. 123, Bandar Lampung, Lampung</span>
+                <span className="text-blue-200 text-sm">Jl. Turi Raya No.40, Tj. Senang, Kec. Tj. Senang, Kota Bandar Lampung, Lampung 35141</span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center shrink-0">

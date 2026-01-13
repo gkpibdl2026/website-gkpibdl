@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useNotification } from '@/context/NotificationContext'
+import { CardsGridSkeleton } from '@/components/ui/Skeleton'
 
 interface Jadwal {
   id: string
@@ -15,8 +16,14 @@ interface Jadwal {
 
 export default function AdminJadwal() {
   const [jadwalData, setJadwalData] = useState<Jadwal[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const { showConfirm, showToast } = useNotification()
+
+  const filteredData = jadwalData.filter(j => 
+    j.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    j.day.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   useEffect(() => {
     fetchJadwal()
@@ -71,18 +78,34 @@ export default function AdminJadwal() {
         </Link>
       </div>
 
+      {/* Search */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
+        <div className="relative">
+          <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Cari jadwal berdasarkan nama atau hari..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
+          />
+        </div>
+      </div>
+
       {/* Cards Grid */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full"></div>
-        </div>
-      ) : jadwalData.length === 0 ? (
+        <CardsGridSkeleton count={6} />
+      ) : filteredData.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center">
-          <p className="text-gray-600 dark:text-gray-400">Tidak ada jadwal ibadah ditemukan</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            {searchTerm ? 'Tidak ada jadwal yang cocok dengan pencarian' : 'Tidak ada jadwal ibadah ditemukan'}
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {jadwalData.map((jadwal) => (
+          {filteredData.map((jadwal) => (
             <div key={jadwal.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center">

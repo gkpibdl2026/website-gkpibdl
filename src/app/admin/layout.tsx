@@ -1,10 +1,21 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { JSX, useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { ToastProvider } from '@/components/ui/Toast'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
+
+// Helper function to check if current path matches or is a child of sidebar item
+const isActiveRoute = (pathname: string, itemHref: string): boolean => {
+  if (itemHref === '/admin') {
+    return pathname === '/admin'
+  }
+  return pathname === itemHref || pathname.startsWith(itemHref + '/')
+}
 
 const sidebarItems = [
   { href: '/admin', label: 'Dashboard', icon: 'home' },
@@ -12,6 +23,8 @@ const sidebarItems = [
   { href: '/admin/pengumuman', label: 'Pengumuman', icon: 'megaphone' },
   { href: '/admin/keuangan', label: 'Keuangan', icon: 'currency' },
   { href: '/admin/jadwal', label: 'Jadwal Ibadah', icon: 'calendar' },
+  { href: '/admin/struktur', label: 'Struktur Organisasi', icon: 'users' },
+  { href: '/admin/album', label: 'Album Galeri', icon: 'image' },
 ]
 
 const icons: Record<string, JSX.Element> = {
@@ -40,6 +53,16 @@ const icons: Record<string, JSX.Element> = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
     </svg>
   ),
+  users: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+  ),
+  image: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  ),
 }
 
 export default function AdminLayout({
@@ -49,7 +72,7 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, loading } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
@@ -71,6 +94,7 @@ export default function AdminLayout({
   }
 
   return (
+    <ToastProvider>
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
@@ -89,9 +113,14 @@ export default function AdminLayout({
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-[#2d4a6f] dark:border-gray-700">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">G</span>
-            </div>
+            <Image 
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuFEWaYkeWEHQWvnpP9dqaCtdKEZOFnBmtLg&s" 
+              alt="Logo GKPI"
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-lg object-contain"
+              unoptimized
+            />
             <div>
               <p className="font-bold text-white! text-sm leading-tight">GKPI Admin</p>
               <p className="text-xs text-white!">Dashboard</p>
@@ -116,8 +145,8 @@ export default function AdminLayout({
               href={item.href}
               onClick={() => setIsMobileMenuOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                pathname === item.href
-                  ? 'bg-blue-600/20 text-white!'
+                isActiveRoute(pathname, item.href)
+                  ? 'bg-blue-600/20 text-white! border-l-4 border-blue-400'
                   : 'text-white! hover:bg-[#2d4a6f] dark:hover:bg-gray-700 hover:text-white!'
               }`}
             >
@@ -127,69 +156,83 @@ export default function AdminLayout({
           ))}
         </nav>
 
-        {/* Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#2d4a6f] dark:border-gray-700">
+        {/* Logout & Back */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#2d4a6f] dark:border-gray-700 space-y-2">
           <Link
             href="/"
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white! hover:bg-[#2d4a6f] dark:hover:bg-gray-700 hover:text-white! transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             Kembali ke Website
           </Link>
+          <button
+            onClick={async () => {
+              await signOut()
+              router.push('/login')
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Logout
+          </button>
         </div>
       </aside>
 
       {/* Main Content */}
       <div className="lg:pl-64">
         {/* Top Bar */}
-        <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
-          <div className="flex items-center gap-4">
+        <header className="h-14 md:h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-2 md:px-6 sticky top-0 z-10">
+          <div className="flex items-center gap-1 md:gap-4 min-w-0 flex-1">
             {/* Mobile menu button */}
             <button 
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-200"
+              className="lg:hidden p-1.5 md:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-200 shrink-0"
               onClick={() => setIsMobileMenuOpen(true)}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Dashboard Admin</h1>
+            <h1 className="font-semibold text-gray-900 dark:text-white truncate" style={{ fontSize: 'clamp(18px, 3vw, 24px)' }}>Dashboard Admin</h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 md:gap-3 shrink-0">
             {/* Theme Toggle */}
             <ThemeToggle />
             {/* User Avatar */}
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-              <span className="text-sm font-medium text-white">A</span>
+            <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+              <span className="text-[10px] md:text-sm font-medium text-white">A</span>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-[calc(100vh-64px)]">
+        <main className="p-4 md:p-6 pb-20 lg:pb-6 bg-gray-50 dark:bg-gray-900 min-h-[calc(100vh-56px)] md:min-h-[calc(100vh-64px)]">
+          <Breadcrumb />
           {children}
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#1e3a5f] dark:bg-gray-800 border-t border-[#2d4a6f] dark:border-gray-700 flex justify-around items-center h-16 lg:hidden z-30">
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#1e3a5f] dark:bg-gray-800 border-t border-[#2d4a6f] dark:border-gray-700 flex justify-around items-center h-14 lg:hidden z-30 px-1">
         {sidebarItems.slice(0, 5).map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
-              pathname === item.href
-                ? 'text-blue-400'
+            className={`flex flex-col items-center justify-center py-1.5 px-1 min-w-0 flex-1 rounded-lg transition-colors ${
+              isActiveRoute(pathname, item.href)
+                ? 'text-blue-400 bg-blue-600/20'
                 : 'text-white! hover:text-white!'
             }`}
           >
             {icons[item.icon]}
-            <span className="text-xs mt-1">{item.label.split(' ')[0]}</span>
+            <span className="text-[9px] mt-0.5 truncate w-full text-center">{item.label.split(' ')[0]}</span>
           </Link>
         ))}
       </nav>
     </div>
+    </ToastProvider>
   )
 }

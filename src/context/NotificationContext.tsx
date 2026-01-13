@@ -102,13 +102,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                     </svg>
                   </div>
                 )}
-                <h3 className="text-lg font-semibold text-gray-900">{modal.title}</h3>
+                <h3 className="text-lg font-semibold text-gray-900!">{modal.title}</h3>
               </div>
             </div>
 
             {/* Body */}
-            <div className="px-6 py-5">
-              <p className="text-gray-600">{modal.message}</p>
+            <div className="px-6 py-5 bg-white">
+              <p className="text-gray-700!">{modal.message}</p>
             </div>
 
             {/* Footer */}

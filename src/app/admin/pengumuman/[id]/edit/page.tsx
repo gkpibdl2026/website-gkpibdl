@@ -157,7 +157,7 @@ export default function EditPengumuman() {
         </div>
 
         <div className="flex items-center justify-end gap-4">
-          <Link href="/admin/pengumuman" className="px-6 py-3 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">Batal</Link>
+          <Link href="/admin/pengumuman" className="px-6 py-3 text-red-500 dark:text-red-400 font-medium hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors">Batal</Link>
           <button
             type="submit"
             disabled={isSubmitting}

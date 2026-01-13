@@ -1,9 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNotification } from '@/context/NotificationContext'
 import { useRouter } from 'next/navigation'
+import { useAutoSave } from '@/hooks/useAutoSave'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import { CharacterCounter } from '@/components/ui/CharacterCounter'
+
+const DRAFT_KEY = 'warta_new'
 
 export default function NewWarta() {
   const [formData, setFormData] = useState({
@@ -12,9 +17,59 @@ export default function NewWarta() {
     excerpt: '',
     status: 'draft',
   })
+  const [initialData, setInitialData] = useState({
+    title: '',
+    content: '',
+    excerpt: '',
+    status: 'draft',
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { showToast } = useNotification()
+  const [showDraftBanner, setShowDraftBanner] = useState(false)
+  const { showToast, showConfirm } = useNotification()
   const router = useRouter()
+
+  // Check if form has changes
+  const hasChanges = useMemo(() => {
+    return JSON.stringify(formData) !== JSON.stringify(initialData)
+  }, [formData, initialData])
+
+  // Auto-save hook
+  const { loadDraft, clearDraft, getDraftTimestamp, hasDraft } = useAutoSave({
+    key: DRAFT_KEY,
+    data: formData,
+    delay: 1500,
+    enabled: hasChanges,
+  })
+
+  // Unsaved changes warning
+  useUnsavedChanges({
+    hasChanges,
+    message: 'Ada perubahan yang belum disimpan. Yakin ingin meninggalkan halaman?',
+  })
+
+  // Load draft on mount
+  useEffect(() => {
+    if (hasDraft()) {
+      setShowDraftBanner(true)
+    }
+  }, [hasDraft])
+
+  // Restore draft
+  const handleRestoreDraft = () => {
+    const draft = loadDraft()
+    if (draft) {
+      setFormData(draft)
+      setInitialData(draft)
+      setShowDraftBanner(false)
+      showToast('Draft berhasil dimuat', 'success')
+    }
+  }
+
+  // Dismiss draft
+  const handleDismissDraft = () => {
+    clearDraft()
+    setShowDraftBanner(false)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,6 +88,7 @@ export default function NewWarta() {
       })
       
       if (res.ok) {
+        clearDraft() // Clear draft after successful save
         showToast('Warta berhasil disimpan!', 'success')
         router.push('/admin/warta')
       } else {
@@ -47,8 +103,56 @@ export default function NewWarta() {
     }
   }
 
+  // Handle cancel with unsaved changes
+  const handleCancel = () => {
+    if (hasChanges) {
+      showConfirm(
+        'Perubahan Belum Disimpan',
+        'Ada perubahan yang belum disimpan. Yakin ingin meninggalkan halaman?',
+        () => {
+          router.push('/admin/warta')
+        }
+      )
+    } else {
+      router.push('/admin/warta')
+    }
+  }
+
   return (
     <div className="max-w-4xl">
+      {/* Draft Banner */}
+      {showDraftBanner && (
+        <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">Draft tersedia</p>
+              <p className="text-xs text-amber-600 dark:text-amber-400">
+                Terakhir disimpan: {getDraftTimestamp()?.toLocaleString('id-ID') || 'Tidak diketahui'}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleDismissDraft}
+              className="px-3 py-1.5 text-sm text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-lg transition-colors"
+            >
+              Abaikan
+            </button>
+            <button
+              type="button"
+              onClick={handleRestoreDraft}
+              className="px-3 py-1.5 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+            >
+              Pulihkan
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <Link 
@@ -60,8 +164,18 @@ export default function NewWarta() {
           </svg>
           Kembali
         </Link>
-        <h2 className="text-2xl font-bold text-white">Tambah Warta Baru</h2>
-        <p className="text-gray-300 mt-1">Buat berita atau renungan baru untuk jemaat</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Tambah Warta Baru</h2>
+            <p className="text-gray-300 mt-1">Buat berita atau renungan baru untuk jemaat</p>
+          </div>
+          {hasChanges && (
+            <span className="text-xs text-amber-400 flex items-center gap-1">
+              <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+              Draft otomatis tersimpan
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Form */}
@@ -81,6 +195,7 @@ export default function NewWarta() {
               placeholder="Masukkan judul warta"
               required
             />
+            <CharacterCounter value={formData.title} maxLength={200} />
           </div>
 
           {/* Excerpt */}
@@ -96,6 +211,7 @@ export default function NewWarta() {
               className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
               placeholder="Ringkasan singkat warta (opsional)"
             />
+            <CharacterCounter value={formData.excerpt} maxLength={300} />
           </div>
 
           {/* Content */}
@@ -112,7 +228,10 @@ export default function NewWarta() {
               placeholder="Tulis konten warta di sini..."
               required
             />
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">Tip: Gunakan format Markdown untuk styling teks</p>
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-gray-500 dark:text-gray-400 text-sm">Tip: Gunakan format Markdown untuk styling teks</p>
+              <CharacterCounter value={formData.content} maxLength={10000} />
+            </div>
           </div>
 
           {/* Image Upload */}
@@ -164,12 +283,13 @@ export default function NewWarta() {
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-4">
-          <Link
-            href="/admin/warta"
-            className="px-6 py-3 text-gray-300 dark:text-gray-400 font-medium hover:bg-gray-700 dark:hover:bg-gray-600 rounded-xl transition-colors"
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="px-6 py-3 text-red-500 dark:text-red-400 font-medium hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
           >
             Batal
-          </Link>
+          </button>
           <button
             type="submit"
             disabled={isSubmitting}
