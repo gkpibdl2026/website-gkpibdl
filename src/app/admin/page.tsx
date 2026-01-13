@@ -186,7 +186,11 @@ export default function AdminDashboard() {
               </div>
             ) : (
               recentWarta.map((warta) => (
-                <div key={warta.id} className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <Link 
+                  key={warta.id} 
+                  href={`/admin/warta/${warta.id}/edit`}
+                  className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                >
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white text-sm">{warta.title}</p>
                     <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">{formatDate(warta.created_at)}</p>
@@ -198,7 +202,7 @@ export default function AdminDashboard() {
                   }`}>
                     {warta.published ? 'Published' : 'Draft'}
                   </span>
-                </div>
+                </Link>
               ))
             )}
           </div>

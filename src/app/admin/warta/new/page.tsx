@@ -8,6 +8,7 @@ import { useAutoSave } from '@/hooks/useAutoSave'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { CharacterCounter } from '@/components/ui/CharacterCounter'
 import WartaModuleBuilder from '@/components/admin/warta/WartaModuleBuilder'
+import WartaPreviewModal from '@/components/admin/warta/WartaPreviewModal'
 import { WartaModule } from '@/lib/supabase'
 
 const DRAFT_KEY = 'warta_new'
@@ -29,6 +30,7 @@ export default function NewWarta() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showDraftBanner, setShowDraftBanner] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   const { showToast, showConfirm } = useNotification()
   const router = useRouter()
 
@@ -286,6 +288,17 @@ export default function NewWarta() {
             Batal
           </button>
           <button
+            type="button"
+            onClick={() => setShowPreview(true)}
+            className="px-6 py-3 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-700 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Preview
+          </button>
+          <button
             type="submit"
             disabled={isSubmitting}
             className="px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -294,6 +307,16 @@ export default function NewWarta() {
           </button>
         </div>
       </form>
+
+      {/* Preview Modal */}
+      <WartaPreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={formData.title}
+        date={formData.date}
+        mingguName={formData.minggu_name}
+        modules={formData.modules}
+      />
     </div>
   )
 }

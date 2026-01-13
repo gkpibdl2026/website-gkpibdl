@@ -60,7 +60,17 @@ export interface WartaModule {
   id: string
   type: ModuleType
   order: number
-  data: any // Akan disesuaikan dengan tipe spesifik tiap modul nanti
+  data: unknown // Akan disesuaikan dengan tipe spesifik tiap modul nanti
+}
+
+export interface TataIbadahItem {
+  id: string
+  order: number
+  title: string
+  type: 'RITUAL' | 'NYANYIAN' | 'DOA' | 'FIRMAN' | 'PERSEMBAHAN' | 'WARTA' | 'LAINNYA'
+  description?: string
+  content?: string
+  songId?: string
 }
 
 export interface Pengumuman {

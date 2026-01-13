@@ -23,7 +23,7 @@ export function TableRowSkeleton({ columns = 4 }: { columns?: number }) {
     <tr className="border-b border-gray-100 dark:border-gray-700">
       {Array.from({ length: columns }).map((_, i) => (
         <td key={i} className="px-6 py-4">
-          <Skeleton className="h-4 w-full max-w-[200px]" />
+          <Skeleton className="h-4 w-full max-w-50" />
         </td>
       ))}
     </tr>

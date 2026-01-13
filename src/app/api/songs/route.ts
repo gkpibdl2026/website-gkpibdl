@@ -17,7 +17,8 @@ export async function GET(request: Request) {
     }
 
     if (query) {
-      dbQuery = dbQuery.ilike('title', `%${query}%`)
+      // Search by title OR song_number (e.g., "1" or "Haleluya")
+      dbQuery = dbQuery.or(`title.ilike.%${query}%,song_number.ilike.%${query}%`)
     }
 
     const { data, error } = await dbQuery
