@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { useNotification } from '@/context/NotificationContext'
+import { useNotification } from '@/features/common'
 import { WartaListSkeleton } from '@/components/ui/Skeleton'
 
 interface Warta {

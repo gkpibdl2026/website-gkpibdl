@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { useNotification } from '@/context/NotificationContext'
+import { useNotification } from '@/features/common'
 import { useRouter } from 'next/navigation'
 
 export default function NewPengumuman() {

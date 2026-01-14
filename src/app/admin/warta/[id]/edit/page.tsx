@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { useNotification } from '@/context/NotificationContext'
-import WartaModuleBuilder from '@/components/admin/warta/WartaModuleBuilder'
+import { useNotification } from '@/features/common'
+import { WartaModuleBuilder } from '@/features/warta'
 import { WartaModule } from '@/lib/supabase'
 
 export default function EditWarta() {

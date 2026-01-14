@@ -1,8 +1,8 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
 import { 
-  User,
+  User as FirebaseUser,
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
@@ -11,6 +11,7 @@ import {
   AuthError
 } from 'firebase/auth'
 import { auth, isFirebaseConfigured } from '@/lib/firebase'
+import { User, UserRole } from '../types'
 
 interface SignInResult {
   success: boolean
@@ -18,12 +19,17 @@ interface SignInResult {
 }
 
 interface AuthContextType {
-  user: User | null
+  firebaseUser: FirebaseUser | null
+  appUser: User | null
   loading: boolean
   isConfigured: boolean
+  userRole: UserRole | null
+  isApproved: boolean
   signIn: (email: string, password: string) => Promise<SignInResult>
   signInWithGoogle: () => Promise<SignInResult>
   signOut: () => Promise<void>
+  getToken: () => Promise<string | null>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -58,9 +64,48 @@ function getAuthErrorMessage(error: AuthError): string {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null)
+  const [appUser, setAppUser] = useState<User | null>(null)
   // Initialize loading as false if Firebase is not configured
   const [loading, setLoading] = useState(isFirebaseConfigured)
+
+  // Get Firebase ID token
+  const getToken = useCallback(async (): Promise<string | null> => {
+    if (!firebaseUser) return null
+    try {
+      return await firebaseUser.getIdToken()
+    } catch {
+      return null
+    }
+  }, [firebaseUser])
+
+  // Sync user to database and fetch role
+  const syncUser = useCallback(async (fbUser: FirebaseUser) => {
+    try {
+      const token = await fbUser.getIdToken()
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setAppUser(data.user)
+      }
+    } catch (error) {
+      console.error('Error syncing user:', error)
+    }
+  }, [])
+
+  // Refresh user data from database
+  const refreshUser = useCallback(async () => {
+    if (firebaseUser) {
+      await syncUser(firebaseUser)
+    }
+  }, [firebaseUser, syncUser])
 
   useEffect(() => {
     // If Firebase is not configured, don't try to listen for auth state
@@ -68,13 +113,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setFirebaseUser(user)
+      
+      if (user) {
+        await syncUser(user)
+      } else {
+        setAppUser(null)
+      }
+      
       setLoading(false)
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [syncUser])
 
   const signIn = async (email: string, password: string): Promise<SignInResult> => {
     if (!isFirebaseConfigured) {
@@ -82,7 +134,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const result = await signInWithEmailAndPassword(auth, email, password)
+      await syncUser(result.user)
       return { success: true }
     } catch (error) {
       const authError = error as AuthError
@@ -96,7 +149,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     
     try {
-      await signInWithPopup(auth, googleProvider)
+      const result = await signInWithPopup(auth, googleProvider)
+      await syncUser(result.user)
       return { success: true }
     } catch (error) {
       const authError = error as AuthError
@@ -107,17 +161,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     if (isFirebaseConfigured) {
       await firebaseSignOut(auth)
+      setAppUser(null)
     }
   }
 
+  // Derived values for convenience
+  const userRole = appUser?.role || null
+  const isApproved = appUser?.approved || false
+
   return (
     <AuthContext.Provider value={{ 
-      user, 
+      firebaseUser,
+      appUser,
       loading, 
       isConfigured: isFirebaseConfigured,
+      userRole,
+      isApproved,
       signIn, 
       signInWithGoogle, 
-      signOut 
+      signOut,
+      getToken,
+      refreshUser
     }}>
       {children}
     </AuthContext.Provider>
@@ -129,5 +193,10 @@ export function useAuth() {
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
-  return context
+  
+  // Backward compatibility: expose 'user' as alias for 'firebaseUser'
+  return {
+    ...context,
+    user: context.firebaseUser
+  }
 }

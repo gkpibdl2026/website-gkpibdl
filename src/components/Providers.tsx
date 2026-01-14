@@ -1,8 +1,7 @@
 'use client'
 
-import { AuthProvider } from '@/context/AuthContext'
-import { ThemeProvider } from '@/context/ThemeContext'
-import { NotificationProvider } from '@/context/NotificationContext'
+import { AuthProvider } from '@/features/auth'
+import { ThemeProvider, NotificationProvider } from '@/features/common'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (

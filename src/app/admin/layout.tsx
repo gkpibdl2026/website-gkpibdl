@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { JSX, useEffect, useState } from 'react'
-import { useAuth } from '@/context/AuthContext'
+import { JSX, useEffect, useState, useRef } from 'react'
+import { useAuth } from '@/features/auth'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { ToastProvider } from '@/components/ui/Toast'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -25,6 +25,7 @@ const sidebarItems = [
   { href: '/admin/jadwal', label: 'Jadwal Ibadah', icon: 'calendar' },
   { href: '/admin/struktur', label: 'Struktur Organisasi', icon: 'users' },
   { href: '/admin/album', label: 'Album Galeri', icon: 'image' },
+  { href: '/admin/manage-user', label: 'User Management', icon: 'shield', adminOnly: true },
 ]
 
 const icons: Record<string, JSX.Element> = {
@@ -63,6 +64,11 @@ const icons: Record<string, JSX.Element> = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
     </svg>
   ),
+  shield: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    </svg>
+  ),
 }
 
 export default function AdminLayout({
@@ -72,12 +78,18 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, loading, signOut } = useAuth()
+  const { user, loading, signOut, userRole, isApproved, appUser } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const hasRedirected = useRef(false)
 
   useEffect(() => {
+    // Prevent multiple redirects
+    if (hasRedirected.current) return
+    
+    // Only redirect if not authenticated
     if (!loading && !user) {
-      router.push('/login')
+      hasRedirected.current = true
+      router.replace('/login')
     }
   }, [user, loading, router])
 
@@ -91,6 +103,102 @@ export default function AdminLayout({
 
   if (!user) {
     return null
+  }
+
+  // Show access denied for jemaat users (inline, no redirect)
+  if (userRole === 'jemaat') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+            Akses Ditolak
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-2">
+            Akun <span className="font-medium text-gray-900 dark:text-white">{appUser?.email || 'Anda'}</span> tidak memiliki akses ke Admin Panel.
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 mb-8">
+            Jika Anda merasa ini adalah kesalahan, silakan hubungi administrator untuk mendapatkan akses.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href="/"
+              className="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium"
+            >
+              Kembali ke Website
+            </a>
+            <button
+              onClick={async () => {
+                await signOut()
+                router.push('/login')
+              }}
+              className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Logout & Ganti Akun
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show pending approval message for non-approved users
+  if (appUser && !isApproved && userRole !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Menunggu Persetujuan Admin</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Akun Anda sedang menunggu persetujuan dari administrator. Silakan hubungi admin untuk mengaktifkan akses Anda.</p>
+          <button
+            onClick={async () => {
+              await signOut()
+              router.push('/login')
+            }}
+            className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Show editor restriction message
+  if (userRole === 'editor') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Akses Editor</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Saat ini role Editor belum memiliki akses ke menu admin. Fitur ini akan segera tersedia.</p>
+          <button
+            onClick={async () => {
+              await signOut()
+              router.push('/login')
+            }}
+            className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -139,7 +247,9 @@ export default function AdminLayout({
 
         {/* Nav Items */}
         <nav className="p-4 space-y-1">
-          {sidebarItems.map((item) => (
+          {sidebarItems
+            .filter(item => !('adminOnly' in item) || (item.adminOnly && userRole === 'admin'))
+            .map((item) => (
             <Link
               key={item.href}
               href={item.href}

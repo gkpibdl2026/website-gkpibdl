@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { useNotification } from '@/context/NotificationContext'
+import { useNotification } from '@/features/common'
 import { CardsGridSkeleton } from '@/components/ui/Skeleton'
 
 interface Jadwal {

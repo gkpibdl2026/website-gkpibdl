@@ -2,13 +2,11 @@
 
 import Link from 'next/link'
 import { useState, useEffect, useMemo } from 'react'
-import { useNotification } from '@/context/NotificationContext'
+import { useNotification } from '@/features/common'
 import { useRouter } from 'next/navigation'
-import { useAutoSave } from '@/hooks/useAutoSave'
-import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import { useAutoSave, useUnsavedChanges } from '@/features/common'
 import { CharacterCounter } from '@/components/ui/CharacterCounter'
-import WartaModuleBuilder from '@/components/admin/warta/WartaModuleBuilder'
-import WartaPreviewModal from '@/components/admin/warta/WartaPreviewModal'
+import { WartaModuleBuilder, WartaPreviewModal } from '@/features/warta'
 import { WartaModule } from '@/lib/supabase'
 
 const DRAFT_KEY = 'warta_new'

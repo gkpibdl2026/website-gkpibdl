@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useNotification } from '@/context/NotificationContext'
+import { useNotification } from '@/features/common'
 import { Song, SongCategory, SongVerse } from '@/lib/supabase'
-import SongVerseBuilder from '@/components/admin/songs/SongVerseBuilder'
+import { SongVerseBuilder } from '@/features/songs'
 import Link from 'next/link'
 
 const CATEGORY_OPTIONS: { value: SongCategory; label: string }[] = [

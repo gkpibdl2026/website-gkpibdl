@@ -1,6 +1,6 @@
 'use client'
 
-import { useTheme } from '@/context/ThemeContext'
+import { useTheme } from '@/features/common'
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme()
