@@ -125,12 +125,12 @@ export default function AdminLayout({
             Jika Anda merasa ini adalah kesalahan, silakan hubungi administrator untuk mendapatkan akses.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a
+            <Link
               href="/"
               className="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium"
             >
               Kembali ke Website
-            </a>
+            </Link>
             <button
               onClick={async () => {
                 await signOut()
