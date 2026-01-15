@@ -43,12 +43,11 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <Image 
-              src="https://upload.wikimedia.org/wikipedia/commons/2/29/Logo_GKPI.png" 
+              src="/logo-gkpi.png" 
               alt="Logo GKPI"
               width={48}
               height={48}
               className="w-10 h-10 lg:w-12 lg:h-12 rounded-full object-contain shadow-lg bg-white p-0.5"
-              unoptimized
             />
             <div>
               <p className="font-bold text-(--text-primary) text-sm lg:text-base leading-tight">GKPI</p>

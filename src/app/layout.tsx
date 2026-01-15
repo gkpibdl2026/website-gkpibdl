@@ -21,9 +21,9 @@ export const metadata: Metadata = {
     locale: "id_ID",
   },
   icons: {
-    icon: "https://upload.wikimedia.org/wikipedia/commons/2/29/Logo_GKPI.png",
-    shortcut: "https://upload.wikimedia.org/wikipedia/commons/2/29/Logo_GKPI.png",
-    apple: "https://upload.wikimedia.org/wikipedia/commons/2/29/Logo_GKPI.png",
+    icon: "/logo-gkpi.png?v=2",
+    shortcut: "/logo-gkpi.png?v=2",
+    apple: "/logo-gkpi.png?v=2",
   },
 };
 
