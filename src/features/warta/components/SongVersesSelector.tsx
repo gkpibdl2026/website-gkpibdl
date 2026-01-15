@@ -1,33 +1,72 @@
 import { useState, useEffect } from 'react'
-import { supabaseAdmin, type Song } from '@/lib/supabase'
+import { type Song, type SongSection, type SongSectionType } from '@/lib/supabase'
 
 interface Props {
   songId: string
-  selectedVerses: number[]
-  onChange: (verses: number[]) => void
+  selectedSections: string[] // Format: "section-number" e.g. "reff-1", "bait-2"
+  onChange: (sections: string[]) => void
 }
 
-export default function SongVersesSelector({ songId, selectedVerses, onChange }: Props) {
+const SECTION_LABELS: Record<SongSectionType, string> = {
+  reff: 'Reff',
+  bait: 'Bait',
+  interlude: 'Interlude',
+  bridge: 'Bridge'
+}
+
+const SECTION_COLORS: Record<SongSectionType, string> = {
+  reff: 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800',
+  bait: 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800',
+  interlude: 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800',
+  bridge: 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+}
+
+const SECTION_LABEL_COLORS: Record<SongSectionType, string> = {
+  reff: 'text-purple-700 dark:text-purple-300',
+  bait: 'text-blue-700 dark:text-blue-300',
+  interlude: 'text-amber-700 dark:text-amber-300',
+  bridge: 'text-green-700 dark:text-green-300'
+}
+
+// Helper to convert section to key
+function getSectionKey(section: SongSection): string {
+  return `${section.section}-${section.number}`
+}
+
+// Helper to parse old verse format to new section format
+function normalizeLyrics(lyrics: unknown[]): SongSection[] {
+  if (!lyrics || lyrics.length === 0) return []
+  
+  // Check if old format (has 'verse' property)
+  const firstItem = lyrics[0] as Record<string, unknown>
+  if ('verse' in firstItem) {
+    return lyrics.map((v) => {
+      const verse = v as { verse: number; content: string }
+      return {
+        section: 'bait' as SongSectionType,
+        number: verse.verse,
+        content: verse.content
+      }
+    })
+  }
+  
+  return lyrics as SongSection[]
+}
+
+export default function SongVersesSelector({ songId, selectedSections, onChange }: Props) {
   const [song, setSong] = useState<Song | null>(null)
+  const [sections, setSections] = useState<SongSection[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchSong = async () => {
       setIsLoading(true)
       try {
-        // In client component we should use the API we created typically, 
-        // passing through existing API or creating a specific one.
-        // We already have GET /api/songs?query=... but need by ID.
-        // Since we didn't explicitly make a 'GET /api/songs/[id]' for public/client fetching 
-        // (we made PUT/DELETE), let's double check if we can reuse or need to add.
-        // Actually PUT /api/songs/[id] exists. We can add GET there or use query param on list.
-        // For simplicity/speed, let's just use the query API or add GET to the [id] route.
-        // The [id] route currently only has PUT/DELETE. Let's add GET there quickly.
-        
         const res = await fetch(`/api/songs/${songId}`)
         if (res.ok) {
           const { data } = await res.json()
           setSong(data)
+          setSections(normalizeLyrics(data.lyrics || []))
         }
       } catch (error) {
         console.error('Error fetching song details:', error)
@@ -41,12 +80,20 @@ export default function SongVersesSelector({ songId, selectedVerses, onChange }:
     }
   }, [songId])
 
-  const toggleVerse = (verseNumber: number) => {
-    if (selectedVerses.includes(verseNumber)) {
-      onChange(selectedVerses.filter(v => v !== verseNumber).sort((a, b) => a - b))
+  const toggleSection = (sectionKey: string) => {
+    if (selectedSections.includes(sectionKey)) {
+      onChange(selectedSections.filter(s => s !== sectionKey))
     } else {
-      onChange([...selectedVerses, verseNumber].sort((a, b) => a - b))
+      onChange([...selectedSections, sectionKey])
     }
+  }
+
+  const selectAll = () => {
+    onChange(sections.map(getSectionKey))
+  }
+
+  const clearAll = () => {
+    onChange([])
   }
 
   if (isLoading) return <div className="text-sm text-gray-500">Memuat lirik...</div>
@@ -56,19 +103,19 @@ export default function SongVersesSelector({ songId, selectedVerses, onChange }:
     <div className="space-y-3 bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
       <div className="flex items-center justify-between mb-2">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Pilih Ayat/Bait:
+          Pilih Section:
         </label>
         <div className="flex gap-2">
            <button 
              type="button"
-             onClick={() => onChange(song.lyrics.map(l => l.verse))}
+             onClick={selectAll}
              className="text-xs text-blue-600 hover:text-blue-700"
            >
              Pilih Semua
            </button>
            <button 
              type="button"
-             onClick={() => onChange([])}
+             onClick={clearAll}
              className="text-xs text-gray-500 hover:text-gray-600"
            >
              Reset
@@ -76,33 +123,39 @@ export default function SongVersesSelector({ songId, selectedVerses, onChange }:
         </div>
       </div>
       
-      {song.lyrics && song.lyrics.length > 0 ? (
+      {sections && sections.length > 0 ? (
         <div className="grid gap-2">
-          {song.lyrics.map((verse) => (
-            <label 
-              key={verse.verse} 
-              className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                selectedVerses.includes(verse.verse)
-                  ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border-gray-200 dark:border-gray-700'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={selectedVerses.includes(verse.verse)}
-                onChange={() => toggleVerse(verse.verse)}
-                className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-              />
-              <div className="flex-1">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">
-                  Bait {verse.verse}
-                </span>
-                <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2">
-                  {verse.content}
-                </p>
-              </div>
-            </label>
-          ))}
+          {sections.map((section) => {
+            const sectionKey = getSectionKey(section)
+            const isSelected = selectedSections.includes(sectionKey)
+            const sectionType = section.section as SongSectionType
+            
+            return (
+              <label 
+                key={sectionKey} 
+                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  isSelected
+                    ? SECTION_COLORS[sectionType]
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border-gray-200 dark:border-gray-700'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSection(sectionKey)}
+                  className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                />
+                <div className="flex-1">
+                  <span className={`text-xs font-bold uppercase tracking-wider mb-1 block ${SECTION_LABEL_COLORS[sectionType]}`}>
+                    {SECTION_LABELS[sectionType]} {section.number}
+                  </span>
+                  <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2">
+                    {section.content}
+                  </p>
+                </div>
+              </label>
+            )
+          })}
         </div>
       ) : (
         <p className="text-sm text-gray-500 italic">Tidak ada lirik tersedia.</p>

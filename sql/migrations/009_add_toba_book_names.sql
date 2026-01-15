@@ -1,0 +1,81 @@
+-- =============================================
+-- MIGRATION: 009_add_toba_book_names
+-- DESCRIPTION: Add Batak Toba translation for Bible book names
+-- =============================================
+
+-- 1. Add column book_name_toba
+ALTER TABLE bible_books ADD COLUMN IF NOT EXISTS book_name_toba TEXT;
+
+-- 2. Update Batak Toba names based on abbreviation
+UPDATE bible_books SET book_name_toba = CASE book_abbr
+  -- Perjanjian Lama (Padan Narobi)
+  WHEN 'Kej' THEN '1 Musa'
+  WHEN 'Kel' THEN '2 Musa'
+  WHEN 'Im' THEN '3 Musa'
+  WHEN 'Bil' THEN '4 Musa'
+  WHEN 'Ul' THEN '5 Musa'
+  WHEN 'Yos' THEN 'Josua'
+  WHEN 'Hak' THEN 'Panguhum'
+  WHEN 'Rut' THEN 'Rut'
+  WHEN '1Sam' THEN '1 Samuel'
+  WHEN '2Sam' THEN '2 Samuel'
+  WHEN '1Raj' THEN '1 Raja-raja'
+  WHEN '2Raj' THEN '2 Raja-raja'
+  WHEN '1Taw' THEN '1 Kronika'
+  WHEN '2Taw' THEN '2 Kronika'
+  WHEN 'Ezr' THEN 'Esra'
+  WHEN 'Neh' THEN 'Nehemia'
+  WHEN 'Est' THEN 'Ester'
+  WHEN 'Ayb' THEN 'Job'
+  WHEN 'Mzm' THEN 'Psalmen'
+  WHEN 'Ams' THEN 'Poda'
+  WHEN 'Pkh' THEN 'Parjamita'
+  WHEN 'Kid' THEN 'Angka Ende'
+  WHEN 'Yes' THEN 'Jesaya'
+  WHEN 'Yer' THEN 'Jeremia'
+  WHEN 'Rat' THEN 'Andung-andung'
+  WHEN 'Yeh' THEN 'Hesekiel'
+  WHEN 'Dan' THEN 'Daniel'
+  WHEN 'Hos' THEN 'Hosea'
+  WHEN 'Yl' THEN 'Joel'
+  WHEN 'Am' THEN 'Amos'
+  WHEN 'Ob' THEN 'Obaja'
+  WHEN 'Yun' THEN 'Jona'
+  WHEN 'Mi' THEN 'Mika'
+  WHEN 'Nah' THEN 'Nahum'
+  WHEN 'Hab' THEN 'Habakuk'
+  WHEN 'Zef' THEN 'Sepania'
+  WHEN 'Hag' THEN 'Haggai'
+  WHEN 'Za' THEN 'Sakaria'
+  WHEN 'Mal' THEN 'Maleaki'
+  
+  -- Perjanjian Baru (Padan na Imbaru)
+  WHEN 'Mat' THEN 'Mateus'
+  WHEN 'Mrk' THEN 'Markus'
+  WHEN 'Luk' THEN 'Lukas'
+  WHEN 'Yoh' THEN 'Johannes'
+  WHEN 'Kis' THEN 'Ulaon ni Apostel'
+  WHEN 'Rm' THEN 'Rom'
+  WHEN '1Kor' THEN '1 Korint'
+  WHEN '2Kor' THEN '2 Korint'
+  WHEN 'Gal' THEN 'Galatia'
+  WHEN 'Ef' THEN 'Epesus'
+  WHEN 'Flp' THEN 'Pilippi'
+  WHEN 'Kol' THEN 'Kolosse'
+  WHEN '1Tes' THEN '1 Tessalonik'
+  WHEN '2Tes' THEN '2 Tessalonik'
+  WHEN '1Tim' THEN '1 Timoteus'
+  WHEN '2Tim' THEN '2 Timoteus'
+  WHEN 'Tit' THEN 'Titus'
+  WHEN 'Flm' THEN 'Pilemon'
+  WHEN 'Ibr' THEN 'Heber'
+  WHEN 'Yak' THEN 'Jakobus'
+  WHEN '1Ptr' THEN '1 Petrus'
+  WHEN '2Ptr' THEN '2 Petrus'
+  WHEN '1Yoh' THEN '1 Johannes'
+  WHEN '2Yoh' THEN '2 Johannes'
+  WHEN '3Yoh' THEN '3 Johannes'
+  WHEN 'Yud' THEN 'Judas'
+  WHEN 'Why' THEN 'Pangungkapon'
+  ELSE book_name -- Default keep existing name if not matched
+END;

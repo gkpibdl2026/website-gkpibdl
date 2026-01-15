@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useNotification } from '@/features/common'
-import { Song, SongCategory, SongVerse } from '@/lib/supabase'
+import { Song, SongCategory, SongSection, SongSectionType } from '@/lib/supabase'
 import { SongVerseBuilder } from '@/features/songs'
-import Link from 'next/link'
 
 const CATEGORY_OPTIONS: { value: SongCategory; label: string }[] = [
   { value: 'KJ', label: 'Kidung Jemaat (KJ)' },
@@ -13,6 +12,25 @@ const CATEGORY_OPTIONS: { value: SongCategory; label: string }[] = [
   { value: 'BE', label: 'Buku Ende (BE)' },
   { value: 'KK', label: 'Kidung Keesaan (KK)' },
 ]
+
+// Helper to convert old verse format to new section format
+function normalizeLyrics(lyrics: unknown[]): SongSection[] {
+  if (!lyrics || lyrics.length === 0) return []
+  
+  const firstItem = lyrics[0] as Record<string, unknown>
+  if ('verse' in firstItem) {
+    return lyrics.map((v) => {
+      const verse = v as { verse: number; content: string }
+      return {
+        section: 'bait' as SongSectionType,
+        number: verse.verse,
+        content: verse.content
+      }
+    })
+  }
+  
+  return lyrics as SongSection[]
+}
 
 export default function SongsPage() {
   const [songs, setSongs] = useState<Song[]>([])
@@ -29,7 +47,7 @@ export default function SongsPage() {
     title: '',
     song_number: '',
     category: 'KJ' as SongCategory,
-    lyrics: [] as SongVerse[]
+    lyrics: [] as SongSection[]
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -55,6 +73,7 @@ export default function SongsPage() {
 
   useEffect(() => {
     fetchSongs()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, categoryFilter])
 
   const handleOpenModal = (song?: Song) => {
@@ -64,7 +83,7 @@ export default function SongsPage() {
         title: song.title,
         song_number: song.song_number,
         category: song.category,
-        lyrics: song.lyrics || []
+        lyrics: normalizeLyrics(song.lyrics || [])
       })
     } else {
       setEditingSong(null)
@@ -169,7 +188,7 @@ export default function SongsPage() {
                   <h3 className="font-semibold text-gray-900 dark:text-white">{song.title}</h3>
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {song.lyrics?.length || 0} Bait
+                  {song.lyrics?.length || 0} Section
                 </p>
               </div>
               <button
@@ -248,7 +267,7 @@ export default function SongsPage() {
 
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
                   <SongVerseBuilder 
-                    verses={formData.lyrics}
+                    sections={formData.lyrics}
                     onChange={(lyrics) => setFormData({ ...formData, lyrics })}
                   />
                 </div>

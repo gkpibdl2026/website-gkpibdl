@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,6 +20,11 @@ export const metadata: Metadata = {
     type: "website",
     locale: "id_ID",
   },
+  icons: {
+    icon: "https://upload.wikimedia.org/wikipedia/commons/2/29/Logo_GKPI.png",
+    shortcut: "https://upload.wikimedia.org/wikipedia/commons/2/29/Logo_GKPI.png",
+    apple: "https://upload.wikimedia.org/wikipedia/commons/2/29/Logo_GKPI.png",
+  },
 };
 
 export default function RootLayout({
@@ -32,8 +38,10 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
 }
+
 

@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     if (!bookId) {
       const { data: books, error } = await supabaseAdmin
         .from('bible_books')
-        .select('id, book_name, book_abbr, testament, book_order, total_chapters')
+        .select('id, book_name, book_name_toba, book_abbr, testament, book_order, total_chapters')
         .order('book_order', { ascending: true })
 
       if (error) throw error

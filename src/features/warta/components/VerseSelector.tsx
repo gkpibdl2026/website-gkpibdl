@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 interface BibleBook {
   id: number
   book_name: string
+  book_name_toba: string | null
   book_abbr: string
   testament: string
   book_order: number
@@ -99,10 +100,13 @@ export default function VerseSelector({ onSelect }: Props) {
     if (!selectedBook || !chapter || verses.length === 0) return
 
     const content = verses.map(v => `${v.verse}. ${v.content}`).join(' ')
+    const bookName = (translation === 'TOBA' && selectedBook.book_name_toba) 
+      ? selectedBook.book_name_toba 
+      : selectedBook.book_name
     
     onSelect({
       bookId: selectedBook.id,
-      bookName: selectedBook.book_name,
+      bookName,
       bookAbbr: selectedBook.book_abbr,
       chapter: parseInt(chapter),
       verseStart: verseStart ? parseInt(verseStart) : verses[0]?.verse || 1,
@@ -134,7 +138,7 @@ export default function VerseSelector({ onSelect }: Props) {
             <option value="">Pilih Kitab</option>
             {books.map(book => (
               <option key={book.id} value={book.id}>
-                {book.book_name}
+                {(translation === 'TOBA' && book.book_name_toba) ? book.book_name_toba : book.book_name}
               </option>
             ))}
           </select>
@@ -189,7 +193,7 @@ export default function VerseSelector({ onSelect }: Props) {
       {/* Translation Selector */}
       <div className="flex items-center gap-4">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Terjemahan:</span>
-        {['TB', 'BIS', 'FAYH'].map(t => (
+        {['TB', 'TOBA', 'BIS', 'FAYH'].map(t => (
           <label key={t} className="flex items-center gap-1 cursor-pointer">
             <input
               type="radio"

@@ -330,8 +330,8 @@ export default function TataIbadahEditor({ data, onUpdate }: Props) {
                                  <label className="block text-xs font-medium text-gray-500 mb-2">Pilih Ayat (Opsional)</label>
                                  <SongVersesSelector 
                                    songId={item.songId}
-                                   selectedVerses={item.songVerses || []}
-                                   onChange={(verses) => handleUpdateItem(item.id, { songVerses: verses })}
+                                   selectedSections={item.songSections || (item.songVerses?.map(v => `bait-${v}`) || [])}
+                                   onChange={(sections) => handleUpdateItem(item.id, { songSections: sections })}
                                  />
                                </div>
                              )}

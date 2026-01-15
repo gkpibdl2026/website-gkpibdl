@@ -29,6 +29,15 @@ export interface Warta {
 
 export type SongCategory = 'KJ' | 'PKJ' | 'NKB' | 'BE' | 'KK'
 
+export type SongSectionType = 'reff' | 'bait' | 'interlude' | 'bridge'
+
+export interface SongSection {
+  section: SongSectionType
+  number: number
+  content: string
+}
+
+// Legacy format for backward compatibility
 export interface SongVerse {
   verse: number
   content: string
@@ -39,10 +48,9 @@ export interface Song {
   title: string
   song_number: string
   category: SongCategory
-  lyrics: SongVerse[]
+  lyrics: SongSection[] | SongVerse[] // Support both formats during migration
   created_at: string
   updated_at: string
-
 }
 
 export type ModuleType = 
@@ -71,7 +79,8 @@ export interface TataIbadahItem {
   description?: string
   content?: string
   songId?: string
-  songVerses?: number[]
+  songVerses?: number[] // Legacy: verse numbers (1, 2, 3...)
+  songSections?: string[] // New: section keys ("reff-1", "bait-1", "bait-2"...)
 }
 
 export interface Pengumuman {

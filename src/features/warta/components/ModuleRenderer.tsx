@@ -13,7 +13,18 @@ interface Props {
 export default function ModuleRenderer({ module, onUpdate }: Props) {
   switch (module.type) {
     case 'LAGU':
-      const songData = module.data as { songId?: string; songTitle?: string; songNumber?: string; category?: string; selectedVerses?: number[] }
+      const songData = module.data as { 
+        songId?: string; 
+        songTitle?: string; 
+        songNumber?: string; 
+        category?: string; 
+        selectedVerses?: number[];
+        selectedSections?: string[];
+      }
+
+      // Backward compatibility: map old verse numbers to new "bait-N" format if selectedSections is missing
+      const effectiveSelectedSections = songData.selectedSections || 
+        (songData.selectedVerses?.map(v => `bait-${v}`) || [])
       
       return (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
@@ -40,15 +51,19 @@ export default function ModuleRenderer({ module, onUpdate }: Props) {
                 songTitle: song.title,
                 songNumber: song.song_number,
                 category: song.category,
-                selectedVerses: [] 
+                selectedSections: [] 
               })} 
             />
           ) : (
             <div className="space-y-4">
                <SongVersesSelector 
                  songId={songData.songId} 
-                 selectedVerses={songData.selectedVerses || []}
-                 onChange={(verses) => onUpdate({ ...songData, selectedVerses: verses })}
+                 selectedSections={effectiveSelectedSections}
+                 onChange={(sections) => {
+                   // When updating, we can clear the old selectedVerses to avoid confusion, 
+                   // or keep them synced. For now, we move forward with selectedSections.
+                   onUpdate({ ...songData, selectedSections: sections })
+                 }}
                />
             </div>
           )}
