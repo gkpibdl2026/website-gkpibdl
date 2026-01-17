@@ -222,12 +222,11 @@ export default function AdminLayout({
         <div className="h-16 flex items-center justify-between px-6 border-b border-[#2d4a6f] dark:border-gray-700">
           <Link href="/admin" className="flex items-center gap-3">
             <Image 
-              src="https://upload.wikimedia.org/wikipedia/commons/2/29/Logo_GKPI.png" 
+              src="/logo-gkpi.png" 
               alt="Logo GKPI"
               width={32}
               height={32}
               className="w-8 h-8 rounded-lg object-contain bg-white/10 p-0.5"
-              unoptimized
             />
             <div>
               <p className="font-bold text-white! text-sm leading-tight">GKPI Admin</p>

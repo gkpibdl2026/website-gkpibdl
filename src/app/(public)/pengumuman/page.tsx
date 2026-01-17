@@ -73,9 +73,10 @@ export default function PengumumanPage() {
           ) : (
             <div className="space-y-6">
               {pengumumanData.map((item) => (
-                <div 
+                <Link 
                   key={item.id}
-                  className={`p-6 rounded-2xl border-l-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-all ${
+                  href={`/pengumuman/${item.id}`}
+                  className={`block p-6 rounded-2xl border-l-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-all group ${
                     item.priority === 'urgent' 
                       ? 'border-l-red-500 bg-red-50/30 dark:bg-red-900/20' 
                       : item.priority === 'important' 
@@ -93,13 +94,19 @@ export default function PengumumanPage() {
                     }`}>
                       {item.priority === 'urgent' ? '🔴 Mendesak' : item.priority === 'important' ? '🟡 Penting' : 'ℹ️ Info'}
                     </span>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">{formatDate(item.created_at)}</p>
-                      <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-3">{item.title}</h3>
-                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{item.content}</p>
+                      <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{item.title}</h3>
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3">{item.content}</p>
+                      <span className="inline-flex items-center gap-1 mt-4 text-blue-600 dark:text-blue-400 text-sm font-medium">
+                        Baca selengkapnya
+                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
