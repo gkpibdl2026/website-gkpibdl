@@ -17,8 +17,25 @@ export async function GET(request: Request) {
     }
 
     if (query) {
-      // Search by title OR song_number (e.g., "1" or "Haleluya")
-      dbQuery = dbQuery.or(`title.ilike.%${query}%,song_number.ilike.%${query}%`)
+      // Detect pattern: "KJ 120", "PKJ 23", etc.
+      const categoryPattern = /^(KJ|PKJ|NKB|BE|KK)\s+(\d+)$/i
+      const match = query.match(categoryPattern)
+
+      if (match) {
+        // Search by category + song_number
+        const [, categoryValue, number] = match
+        dbQuery = dbQuery
+          .eq('category', categoryValue.toUpperCase())
+          .eq('song_number', number)
+      } else {
+        // Original search with punctuation normalization
+        // Remove punctuation for more flexible title search
+        const normalizedQuery = query.replace(/[,\.!?;:]/g, ' ').trim()
+        
+        dbQuery = dbQuery.or(
+          `title.ilike.%${normalizedQuery}%,song_number.ilike.%${query}%`
+        )
+      }
     }
 
     const { data, error } = await dbQuery

@@ -11,17 +11,54 @@ import { WartaModule } from '@/lib/supabase'
 
 const DRAFT_KEY = 'warta_new'
 
+// Helper function to get the next Sunday from today
+function getNextSunday(): Date {
+  const today = new Date()
+  const currentDay = today.getDay() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const daysUntilSunday = currentDay === 0 ? 7 : 7 - currentDay // If today is Sunday, get next Sunday
+  
+  const nextSunday = new Date(today)
+  nextSunday.setDate(today.getDate() + daysUntilSunday)
+  
+  return nextSunday
+}
+
+// Helper function to generate default warta title
+function generateDefaultWartaTitle(date: Date): string {
+  const day = date.getDate()
+  const monthNames = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ]
+  const month = monthNames[date.getMonth()]
+  const year = date.getFullYear()
+  
+  return `Warta Jemaat - Minggu ${day} ${month} ${year}`
+}
+
+// Helper function to format date as YYYY-MM-DD for input value
+function formatDateForInput(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export default function NewWarta() {
+  const nextSunday = getNextSunday()
+  const defaultTitle = generateDefaultWartaTitle(nextSunday)
+  const defaultDate = formatDateForInput(nextSunday)
+  
   const [formData, setFormData] = useState({
-    title: '',
-    date: new Date().toISOString().split('T')[0],
+    title: defaultTitle,
+    date: defaultDate,
     minggu_name: '',
     status: 'draft',
     modules: [] as WartaModule[],
   })
   const [initialData, setInitialData] = useState({
-    title: '',
-    date: new Date().toISOString().split('T')[0],
+    title: defaultTitle,
+    date: defaultDate,
     minggu_name: '',
     status: 'draft',
     modules: [] as WartaModule[],
@@ -217,6 +254,15 @@ export default function NewWarta() {
                 className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
                 required
               />
+              {formData.date && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Format: {new Date(formData.date + 'T00:00:00').toLocaleDateString('id-ID', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                  })}
+                </p>
+              )}
             </div>
 
             {/* Minggu Name */}
