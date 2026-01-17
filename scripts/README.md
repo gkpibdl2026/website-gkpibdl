@@ -52,3 +52,51 @@ node -e "require('./scripts/import-songs.js').importSong(21, 'KJ')"
 | Rat, Yeh, Dan, Hos, Yl    | 1Ptr, 2Ptr, 1Yoh, 2Yoh |
 | Am, Ob, Yun, Mi, Nah      | 3Yoh, Yud, Why         |
 | Hab, Zef, Hag, Za, Mal    |                        |
+
+---
+
+## Cleanup Songs BE Category
+
+Script untuk membersihkan data yang tidak konsisten pada tabel `songs` kategori `BE`.
+
+### Langkah-langkah
+
+#### 1. **Backup Database (WAJIB!)**
+
+Buka Supabase SQL Editor dan jalankan:
+
+```sql
+-- File: scripts/backup-songs-table.sql
+CREATE TABLE songs_backup_20260117 AS 
+SELECT * FROM songs;
+```
+
+Ganti `20260117` dengan tanggal hari ini (format: YYYYMMDD).
+
+#### 2. **Install Dependencies** (jika belum)
+
+```bash
+npm install
+```
+
+#### 3. **Jalankan Cleanup Script**
+
+```bash
+npm run cleanup:songs-be
+```
+
+Script akan:
+- Menanyakan konfirmasi bahwa backup sudah dibuat
+- Menampilkan preview perubahan yang akan dilakukan
+- Meminta konfirmasi untuk melanjutkan
+- Melakukan update data
+
+### Restore dari Backup
+
+Jika ada masalah dan perlu restore, jalankan di Supabase SQL Editor:
+
+```sql
+DROP TABLE songs;
+ALTER TABLE songs_backup_20260117 RENAME TO songs;
+```
+
