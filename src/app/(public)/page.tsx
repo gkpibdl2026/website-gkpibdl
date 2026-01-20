@@ -153,26 +153,54 @@ export default function Home() {
             </p>
 
             {/* Renungan Harian Card */}
-            <div className="bg-blue-900/60 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/30 max-w-md">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-                <span className="text-yellow-300 text-sm font-semibold uppercase tracking-wide">
-                  Renungan Hari Ini
-                </span>
-              </div>
-              {renunganData?.title && (
-                <h3 className="text-white font-bold text-lg mb-2">{renunganData.title}</h3>
-              )}
-              <p className="text-white italic text-base mb-3 leading-relaxed line-clamp-3">
-                &ldquo;{renunganData?.ayat_kunci || fallbackRenungan.ayat_kunci}&rdquo;
-              </p>
-              <p className="text-blue-200 text-sm">— {renunganData?.referensi || fallbackRenungan.referensi}</p>
-              {renunganData?.source === 'gkpi_sinode' && (
-                <p className="text-blue-300/70 text-xs mt-3">
-                  Sumber: GKPI Sinode
+            {renunganData && (
+              <Link 
+                href={`/renungan/${renunganData.id}`}
+                className="block bg-blue-900/60 backdrop-blur-md rounded-2xl p-6 mb-4 border border-white/30 max-w-md hover:bg-blue-900/80 transition-all hover:-translate-y-1"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                  <span className="text-yellow-300 text-sm font-semibold uppercase tracking-wide">
+                    Renungan Hari Ini
+                  </span>
+                </div>
+                {renunganData.title && (
+                  <h3 className="text-white font-bold text-lg mb-2">{renunganData.title}</h3>
+                )}
+                <p className="text-white italic text-base mb-3 leading-relaxed line-clamp-3">
+                  &ldquo;{renunganData.ayat_kunci || fallbackRenungan.ayat_kunci}&rdquo;
                 </p>
-              )}
-            </div>
+                <p className="text-blue-200 text-sm">— {renunganData.referensi || fallbackRenungan.referensi}</p>
+                {renunganData.source === 'gkpi_sinode' && (
+                  <p className="text-blue-300/70 text-xs mt-3">
+                    Sumber: GKPI Sinode
+                  </p>
+                )}
+              </Link>
+            )}
+            {!renunganData && (
+              <div className="bg-blue-900/60 backdrop-blur-md rounded-2xl p-6 mb-4 border border-white/30 max-w-md">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                  <span className="text-yellow-300 text-sm font-semibold uppercase tracking-wide">
+                    Renungan Hari Ini
+                  </span>
+                </div>
+                <p className="text-white italic text-base mb-3 leading-relaxed line-clamp-3">
+                  &ldquo;{fallbackRenungan.ayat_kunci}&rdquo;
+                </p>
+                <p className="text-blue-200 text-sm">— {fallbackRenungan.referensi}</p>
+              </div>
+            )}
+            <Link
+              href="/renungan"
+              className="inline-flex items-center gap-2 text-blue-200 hover:text-white text-sm font-medium transition-colors mb-8"
+            >
+              Renungan Lainnya
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4">

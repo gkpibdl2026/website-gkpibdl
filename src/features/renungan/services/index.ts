@@ -95,19 +95,46 @@ export function parseRenunganContent(content: string, title: string, link: strin
   const kutipanMatch = cleanContent.match(/Kutipan Renungan:\s*([^]*?)(?=Lagu:|Doa:|$)/i);
   const kutipan = kutipanMatch ? kutipanMatch[1].trim() : undefined;
 
-  // Extract lagu (song) - usually starts with "Lagu:"
-  const laguMatch = cleanContent.match(/Lagu:\s*([^\n]+)/i);
-  const lagu = laguMatch ? laguMatch[1].trim() : undefined;
+  // Extract lagu (song) - usually starts with "Lagu:" and ends before "Doa:"
+  const laguMatch = cleanContent.match(/Lagu:\s*([^]*?)(?=\s*Doa:|$)/i);
+  let lagu = laguMatch ? laguMatch[1].trim() : undefined;
+  
+  // Clean up lagu - remove any trailing garbage
+  if (lagu) {
+    lagu = lagu.replace(/The post.*?first appeared on.*?GKPI Sinode\.?/gi, '').trim();
+  }
 
   // Extract doa (prayer) - usually starts with "Doa:"
   const doaMatch = cleanContent.match(/Doa:\s*([^]*?)(?=Kutipan Renungan:|Lagu:|$)/i);
-  const doa = doaMatch ? doaMatch[1].trim() : undefined;
+  let doa = doaMatch ? doaMatch[1].trim() : undefined;
+  
+  // Clean up doa - remove "The post ... first appeared on GKPI Sinode." garbage
+  if (doa) {
+    doa = doa.replace(/The post.*?first appeared on.*?GKPI Sinode\.?/gi, '').trim();
+    // Also remove any "Amin." suffix cleanup if needed
+    doa = doa.replace(/\s*Amin\.?\s*$/, ' Amin.').trim();
+  }
 
   // Clean up isi_renungan (main content)
   let isi_renungan = cleanContent;
   
   // Remove date line
   isi_renungan = isi_renungan.replace(/^[A-Za-z]+,\s+\d{1,2}\s+[A-Za-z]+\s+\d{4}\s*/i, '');
+  
+  // Remove ayat_kunci from isi (to avoid duplication since it's shown separately)
+  if (ayat_kunci && ayat_kunci.length > 10) {
+    // Escape special regex characters in ayat_kunci
+    const escapedAyat = ayat_kunci.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    isi_renungan = isi_renungan.replace(new RegExp(escapedAyat, 'gi'), '');
+    // Also remove if it starts with the verse reference pattern
+    isi_renungan = isi_renungan.replace(new RegExp(`^\\s*[""]?${escapedAyat}[""]?\\s*`, 'i'), '');
+  }
+  
+  // Remove reference pattern at start (e.g., "(2 Korintus 12:9)")
+  if (referensi) {
+    const escapedRef = referensi.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    isi_renungan = isi_renungan.replace(new RegExp(`\\(${escapedRef}\\)`, 'gi'), '');
+  }
   
   // Remove kutipan, lagu, doa sections from main content
   isi_renungan = isi_renungan.replace(/Kutipan Renungan:\s*[^]*?(?=Lagu:|Doa:|$)/gi, '');
