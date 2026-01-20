@@ -25,16 +25,26 @@ interface Warta {
   created_at: string;
 }
 
-// Renungan Harian (Daily Devotion) - static for now
-const renunganHariIni = {
-  ayat: "Takut akan TUHAN adalah permulaan hikmat, dan mengenal Yang Mahakudus adalah pengertian.",
-  kitab: "Amsal 9:10",
+interface Renungan {
+  id: string;
+  title: string;
+  ayat_kunci: string;
+  referensi: string;
+  source: 'manual' | 'gkpi_sinode';
+}
+
+// Fallback renungan if API fails
+const fallbackRenungan = {
+  ayat_kunci: "Takut akan TUHAN adalah permulaan hikmat, dan mengenal Yang Mahakudus adalah pengertian.",
+  referensi: "Amsal 9:10",
+  title: "Hikmat Sejati",
 };
 
 export default function Home() {
   const [jadwalData, setJadwalData] = useState<Jadwal[]>([]);
   const [pengumumanData, setPengumumanData] = useState<Pengumuman[]>([]);
   const [wartaData, setWartaData] = useState<Warta[]>([]);
+  const [renunganData, setRenunganData] = useState<Renungan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -61,6 +71,47 @@ export default function Home() {
         const { data } = await wartaRes.json();
         setWartaData(data || []);
       }
+
+      // Fetch renungan separately due to its conditional sync logic
+      const fetchRenungan = async () => {
+        try {
+          const res = await fetch("/api/renungan/today");
+          const { data, is_today } = await res.json();
+          if (data) {
+            setRenunganData(data);
+            
+            // Auto-sync strategy:
+            // If the renungan returned is NOT from today (is_today === false),
+            // it means the database is stale. Trigger a background sync.
+            if (is_today === false) {
+              console.log("Renungan stale, triggering background sync...");
+              fetch("/api/renungan/sync", { method: "POST" })
+                .then(syncRes => syncRes.json())
+                .then(syncResult => {
+                  console.log("Background sync result:", syncResult);
+                  // Optional: Re-fetch if sync found new items
+                  if (syncResult.synced > 0) {
+                     fetch("/api/renungan/today") // fetch again to get the new one
+                       .then(r => r.json())
+                       .then(newData => {
+                         if (newData.data) setRenunganData(newData.data);
+                       });
+                  }
+                })
+                .catch(err => console.error("Background sync failed:", err));
+            }
+          } else {
+            // No data at all? Also trigger sync
+            fetch("/api/renungan/sync", { method: "POST" });
+            setRenunganData(fallbackRenungan as Renungan);
+          }
+        } catch (error) {
+          console.error("Error fetching renungan:", error);
+          setRenunganData(fallbackRenungan as Renungan);
+        }
+      };
+      await fetchRenungan(); // Call the renungan fetch function
+      
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -109,10 +160,18 @@ export default function Home() {
                   Renungan Hari Ini
                 </span>
               </div>
-              <p className="text-white italic text-lg mb-3 leading-relaxed">
-                &ldquo;{renunganHariIni.ayat}&rdquo;
+              {renunganData?.title && (
+                <h3 className="text-white font-bold text-lg mb-2">{renunganData.title}</h3>
+              )}
+              <p className="text-white italic text-base mb-3 leading-relaxed line-clamp-3">
+                &ldquo;{renunganData?.ayat_kunci || fallbackRenungan.ayat_kunci}&rdquo;
               </p>
-              <p className="text-blue-200 text-sm">— {renunganHariIni.kitab}</p>
+              <p className="text-blue-200 text-sm">— {renunganData?.referensi || fallbackRenungan.referensi}</p>
+              {renunganData?.source === 'gkpi_sinode' && (
+                <p className="text-blue-300/70 text-xs mt-3">
+                  Sumber: GKPI Sinode
+                </p>
+              )}
             </div>
 
             {/* CTA Buttons */}
