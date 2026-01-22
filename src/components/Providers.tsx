@@ -2,13 +2,16 @@
 
 import { AuthProvider } from '@/features/auth'
 import { ThemeProvider, NotificationProvider } from '@/features/common'
+import { ToastProvider } from '@/components/ui/Toast'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
       <AuthProvider>
         <NotificationProvider>
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </NotificationProvider>
       </AuthProvider>
     </ThemeProvider>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useToast } from '@/components/ui/Toast'
 
 interface StrukturOrganisasi {
   id: string
@@ -36,6 +37,7 @@ const getImageUrl = (url: string | null): string => {
 }
 
 export default function StrukturAdminPage() {
+  const { showToast } = useToast()
   const [data, setData] = useState<StrukturOrganisasi[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -100,13 +102,13 @@ export default function StrukturAdminPage() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Harap pilih file gambar')
+      showToast('error', 'Harap pilih file gambar')
       return
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran file maksimal 5MB')
+      showToast('error', 'Ukuran file maksimal 5MB')
       return
     }
 
@@ -137,7 +139,7 @@ export default function StrukturAdminPage() {
       setFormData(prev => ({ ...prev, image_url: data.url }))
     } catch (error) {
       console.error('Error uploading image:', error)
-      alert('Gagal mengupload gambar. Silakan coba lagi.')
+      showToast('error', 'Gagal mengupload gambar. Silakan coba lagi.')
       setImagePreview(null)
     } finally {
       setUploadingImage(false)

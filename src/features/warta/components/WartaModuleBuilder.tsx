@@ -68,9 +68,9 @@ function getModulePreview(module: WartaModule): string {
       return `${itemCount} item`
     }
     case 'PELAYAN_IBADAH': {
-      const pelayanData = module.data as { items?: unknown[] }
-      const itemCount = pelayanData.items?.length || 0
-      return `${itemCount} pelayan`
+      const pelayanData = module.data as { pelayan?: unknown[] }
+      const itemCount = pelayanData.pelayan?.length || 0
+      return `${itemCount} role pelayan`
     }
     case 'PENGUMUMAN': {
       const pengumumanData = module.data as { items?: unknown[] }
@@ -78,11 +78,9 @@ function getModulePreview(module: WartaModule): string {
       return `${itemCount} pengumuman`
     }
     case 'STATISTIK': {
-      const statistikData = module.data as { total?: number }
-      if (statistikData.total) {
-        return `Total: ${statistikData.total} jemaat`
-      }
-      return 'Belum diisi'
+      const statistikData = module.data as { rows?: unknown[] }
+      const rowCount = statistikData.rows?.length || 0
+      return rowCount > 0 ? `${rowCount} baris data` : 'Belum diisi'
     }
     case 'KEUANGAN': {
       const keuanganData = module.data as { period?: string }
@@ -113,7 +111,7 @@ interface SortableModuleItemProps {
   isCollapsed: boolean
   toggleModuleCollapse: (id: string) => void
   onRemove: (id: string) => void
-  onUpdate: (id: string, data: any) => void
+  onUpdate: (id: string, data: Record<string, unknown>) => void
   MODULE_OPTIONS: { type: ModuleType; label: string }[]
   getModulePreview: (module: WartaModule) => string
 }
@@ -206,7 +204,7 @@ function SortableModuleItem({
                 
                 return (
                   <h3 
-                    className={`font-medium text-gray-900 dark:text-white transition-all duration-200 flex-shrink-0`}
+                    className={`font-medium text-gray-900 dark:text-white transition-all duration-200 shrink-0`}
                     style={{ fontSize: isCollapsed ? fontSize : '16px' }}
                   >
                     {moduleLabel}:
@@ -239,7 +237,7 @@ function SortableModuleItem({
 
       {/* Module Content - Collapsible */}
       <div 
-        className={`transition-all duration-200 ease-in-out ${isCollapsed ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-[2000px] opacity-100'}`}
+        className={`transition-all duration-200 ease-in-out ${isCollapsed ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-none opacity-100'}`}
       >
         <div className="p-4 pl-16">
           <ModuleRenderer 
@@ -318,7 +316,7 @@ export default function WartaModuleBuilder({ modules, onChange }: Props) {
 
 
 
-  const handleUpdateModuleData = (id: string, data: any) => {
+  const handleUpdateModuleData = (id: string, data: Record<string, unknown>) => {
     const newModules = modules.map((m) =>
       m.id === id ? { ...m, data } : m
     )

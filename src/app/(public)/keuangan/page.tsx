@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/Toast";
 
 interface Keuangan {
   id: string;
@@ -17,6 +18,7 @@ function formatCurrency(amount: number) {
 }
 
 export default function KeuanganPage() {
+  const { showToast } = useToast()
   const [keuanganData, setKeuanganData] = useState<Keuangan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -198,7 +200,7 @@ export default function KeuanganPage() {
                     <button 
                       onClick={() => {
                         navigator.clipboard.writeText('1234567890')
-                        alert('Nomor rekening disalin!')
+                        showToast('success', 'Nomor rekening disalin!')
                       }}
                       className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
                       title="Salin nomor rekening"
@@ -224,7 +226,7 @@ export default function KeuanganPage() {
                     <button 
                       onClick={() => {
                         navigator.clipboard.writeText('0987654321')
-                        alert('Nomor rekening disalin!')
+                        showToast('success', 'Nomor rekening disalin!')
                       }}
                       className="p-2 hover:bg-yellow-100 rounded-lg transition-colors"
                       title="Salin nomor rekening"

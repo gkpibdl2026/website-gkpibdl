@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useToast } from '@/components/ui/Toast'
 
 interface GaleriItem {
   id: string
@@ -39,6 +40,7 @@ const getImageUrl = (url: string | null): string => {
 }
 
 export default function GaleriAdminPage() {
+  const { showToast } = useToast()
   const [data, setData] = useState<GaleriItem[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -74,12 +76,12 @@ export default function GaleriAdminPage() {
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      alert('Harap pilih file gambar')
+      showToast('error', 'Harap pilih file gambar')
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran file maksimal 5MB')
+      showToast('error', 'Ukuran file maksimal 5MB')
       return
     }
 
@@ -108,7 +110,7 @@ export default function GaleriAdminPage() {
       setFormData(prev => ({ ...prev, image_url: data.url }))
     } catch (error) {
       console.error('Error uploading image:', error)
-      alert('Gagal mengupload gambar. Silakan coba lagi.')
+      showToast('error', 'Gagal mengupload gambar. Silakan coba lagi.')
       setImagePreview(null)
     } finally {
       setUploadingImage(false)
@@ -119,7 +121,7 @@ export default function GaleriAdminPage() {
     e.preventDefault()
     
     if (!formData.image_url) {
-      alert('Silakan upload gambar atau masukkan URL gambar')
+      showToast('error', 'Silakan upload gambar atau masukkan URL gambar')
       return
     }
     

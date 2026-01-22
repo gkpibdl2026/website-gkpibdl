@@ -3,7 +3,49 @@ import SongSelector from './SongSelector'
 import SongVersesSelector from './SongVersesSelector'
 import VerseSelector from './VerseSelector'
 import TataIbadahEditor from './TataIbadahEditor'
+import PelayanIbadahEditor from './PelayanIbadahEditor'
+import StatistikEditor from './StatistikEditor'
+import UlangTahunEditor from './UlangTahunEditor'
 import { TataIbadahItem } from '@/lib/supabase'
+
+// Type for Pelayan Ibadah
+interface PelayanItem {
+  id: string
+  role: string
+  names: string[]
+}
+
+interface PelayanIbadahData {
+  pelayan: PelayanItem[]
+}
+
+// Type for Statistik
+interface StatistikRow {
+  id: string
+  keterangan: string
+  bapak: number | null
+  ibu: number | null
+  ppRemaja: number | null
+  jumlah: number | null
+}
+
+interface StatistikData {
+  title?: string
+  rows: StatistikRow[]
+}
+
+// Type for Ulang Tahun
+interface UlangTahunItem {
+  id: string
+  name: string
+  birthDate: string
+}
+
+interface UlangTahunData {
+  dateRangeStart?: string
+  dateRangeEnd?: string
+  members: UlangTahunItem[]
+}
 
 interface Props {
   module: WartaModule
@@ -163,6 +205,57 @@ export default function ModuleRenderer({ module, onUpdate }: Props) {
              data={tataIbadahData}
              onUpdate={(newData) => onUpdate({ ...tataIbadahData, ...newData })}
            />
+        </div>
+      )
+    case 'PELAYAN_IBADAH':
+      const pelayanData = module.data as PelayanIbadahData
+      return (
+        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-800">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-medium text-amber-900 dark:text-amber-100 flex items-center gap-2">
+              <span className="p-1 bg-amber-200 dark:bg-amber-800 rounded text-amber-800 dark:text-amber-100 text-xs font-bold">PELAYAN</span>
+              Pelayan Kebaktian Minggu
+            </h4>
+          </div>
+          
+          <PelayanIbadahEditor 
+            data={pelayanData}
+            onUpdate={(newData) => onUpdate({ ...pelayanData, ...newData })}
+          />
+        </div>
+      )
+    case 'STATISTIK':
+      const statistikData = module.data as StatistikData
+      return (
+        <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-100 dark:border-cyan-800">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-medium text-cyan-900 dark:text-cyan-100 flex items-center gap-2">
+              <span className="p-1 bg-cyan-200 dark:bg-cyan-800 rounded text-cyan-800 dark:text-cyan-100 text-xs font-bold">STATISTIK</span>
+              Statistik Kehadiran
+            </h4>
+          </div>
+          
+          <StatistikEditor 
+            data={statistikData}
+            onUpdate={(newData) => onUpdate({ ...statistikData, ...newData })}
+          />
+        </div>
+      )
+    case 'ULANG_TAHUN':
+      const ulangTahunData = module.data as UlangTahunData
+      return (
+        <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg border border-pink-100 dark:border-pink-800">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-medium text-pink-900 dark:text-pink-100 flex items-center gap-2">
+              <span className="p-1 bg-pink-200 dark:bg-pink-800 rounded text-pink-800 dark:text-pink-100 text-xs font-bold">ULTAH</span>
+              Ulang Tahun Jemaat
+            </h4>
+          </div>
+          
+          <UlangTahunEditor 
+            data={ulangTahunData}
+            onUpdate={(newData) => onUpdate({ ...ulangTahunData, ...newData })}
+          />
         </div>
       )
     default:
