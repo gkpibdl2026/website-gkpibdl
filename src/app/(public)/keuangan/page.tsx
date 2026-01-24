@@ -1,7 +1,8 @@
 'use client'
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/Toast";
 
 interface Keuangan {
@@ -13,37 +14,80 @@ interface Keuangan {
   document_url: string | null;
 }
 
+interface BankAccount {
+  bank_name: string;
+  account_number: string;
+  account_holder: string;
+  color: string;
+}
+
+interface PaymentSettings {
+  qris_image_url: string | null;
+  bank_accounts: BankAccount[];
+}
+
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+}
+
+const COLOR_MAP: Record<string, { bg: string; border: string; text: string; textDark: string; button: string }> = {
+  blue: { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-800', textDark: 'text-blue-900', button: 'hover:bg-blue-100 text-blue-600' },
+  yellow: { bg: 'bg-yellow-50', border: 'border-yellow-100', text: 'text-yellow-800', textDark: 'text-yellow-900', button: 'hover:bg-yellow-100 text-yellow-600' },
+  green: { bg: 'bg-green-50', border: 'border-green-100', text: 'text-green-800', textDark: 'text-green-900', button: 'hover:bg-green-100 text-green-600' },
+  red: { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-800', textDark: 'text-red-900', button: 'hover:bg-red-100 text-red-600' },
+  purple: { bg: 'bg-purple-50', border: 'border-purple-100', text: 'text-purple-800', textDark: 'text-purple-900', button: 'hover:bg-purple-100 text-purple-600' },
 }
 
 export default function KeuanganPage() {
   const { showToast } = useToast()
   const [keuanganData, setKeuanganData] = useState<Keuangan[]>([]);
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
+    qris_image_url: null,
+    bank_accounts: []
+  });
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchKeuangan();
-  }, []);
-
-  const fetchKeuangan = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const res = await fetch('/api/keuangan');
-      if (res.ok) {
-        const { data } = await res.json();
+      const [keuanganRes, paymentRes] = await Promise.all([
+        fetch('/api/keuangan'),
+        fetch('/api/payment-settings')
+      ]);
+
+      if (keuanganRes.ok) {
+        const { data } = await keuanganRes.json();
         setKeuanganData(data || []);
       }
+
+      if (paymentRes.ok) {
+        const paymentData = await paymentRes.json();
+        setPaymentSettings({
+          qris_image_url: paymentData.qris_image_url || null,
+          bank_accounts: paymentData.bank_accounts || []
+        });
+      }
     } catch (error) {
-      console.error('Error fetching keuangan:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const totalPemasukan = keuanganData.reduce((sum, item) => sum + (item.pemasukan || 0), 0);
   const totalPengeluaran = keuanganData.reduce((sum, item) => sum + (item.pengeluaran || 0), 0);
   const latestSaldo = keuanganData.length > 0 ? keuanganData[0].saldo : 0;
   const latestPeriod = keuanganData.length > 0 ? keuanganData[0].period : '-';
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    showToast('success', 'Nomor rekening disalin!');
+  };
+
+  const getColors = (color: string) => COLOR_MAP[color] || COLOR_MAP.blue;
 
   return (
     <>
@@ -166,17 +210,26 @@ export default function KeuanganPage() {
             {/* QRIS */}
             <div className="bg-white rounded-2xl p-8 text-center">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Scan QRIS</h3>
-              <div className="w-56 h-56 mx-auto bg-gray-100 rounded-xl flex items-center justify-center mb-4 border-2 border-dashed border-gray-300">
-                {/* Placeholder for QRIS - replace with actual image */}
-                <div className="text-center p-4">
-                  <svg className="w-16 h-16 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                  </svg>
-                  <p className="text-gray-500 text-sm">QR Code QRIS</p>
-                  <p className="text-gray-400 text-xs mt-1">Upload melalui admin</p>
-                </div>
+              <div className="w-56 h-56 mx-auto bg-gray-100 rounded-xl flex items-center justify-center mb-4 border-2 border-dashed border-gray-300 overflow-hidden">
+                {paymentSettings.qris_image_url ? (
+                  <Image
+                    src={paymentSettings.qris_image_url.startsWith('http') ? paymentSettings.qris_image_url : `/api/images/${paymentSettings.qris_image_url}`}
+                    alt="QRIS"
+                    width={224}
+                    height={224}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="text-center p-4">
+                    <svg className="w-16 h-16 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                    <p className="text-gray-500 text-sm">QR Code QRIS</p>
+                    <p className="text-gray-400 text-xs mt-1">Belum tersedia</p>
+                  </div>
+                )}
               </div>
-              <p className="text-gray-900! text-sm">
+              <p className="text-gray-900 text-sm">
                 Scan dengan aplikasi e-wallet atau mobile banking Anda
               </p>
             </div>
@@ -186,57 +239,36 @@ export default function KeuanganPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">Transfer Bank</h3>
               
               <div className="space-y-4">
-                {/* Bank BCA */}
-                <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-blue-800">Bank BCA</span>
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Rekening Gereja</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-2xl font-mono font-bold text-blue-900!">1234567890</p>
-                      <p className="text-blue-700! text-sm mt-1">a.n. GKPI Bandar Lampung</p>
-                    </div>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText('1234567890')
-                        showToast('success', 'Nomor rekening disalin!')
-                      }}
-                      className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
-                      title="Salin nomor rekening"
-                    >
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Bank Mandiri */}
-                <div className="p-4 bg-yellow-50 rounded-xl border border-yellow-100">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-yellow-800">Bank Mandiri</span>
-                    <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">Rekening Gereja</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-2xl font-mono font-bold text-yellow-900!">0987654321</p>
-                      <p className="text-yellow-700! text-sm mt-1">a.n. GKPI Bandar Lampung</p>
-                    </div>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText('0987654321')
-                        showToast('success', 'Nomor rekening disalin!')
-                      }}
-                      className="p-2 hover:bg-yellow-100 rounded-lg transition-colors"
-                      title="Salin nomor rekening"
-                    >
-                      <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+                {paymentSettings.bank_accounts.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">Belum ada rekening bank</p>
+                ) : (
+                  paymentSettings.bank_accounts.map((account, index) => {
+                    const colors = getColors(account.color);
+                    return (
+                      <div key={index} className={`p-4 ${colors.bg} rounded-xl border ${colors.border}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`font-bold ${colors.text}`}>{account.bank_name}</span>
+                          <span className={`text-xs ${colors.bg} ${colors.text} px-2 py-1 rounded-full border ${colors.border}`}>Rekening Gereja</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className={`text-2xl font-mono font-bold ${colors.textDark}`}>{account.account_number}</p>
+                            <p className={`${colors.text} text-sm mt-1`}>a.n. {account.account_holder}</p>
+                          </div>
+                          <button 
+                            onClick={() => copyToClipboard(account.account_number)}
+                            className={`p-2 ${colors.button} rounded-lg transition-colors`}
+                            title="Salin nomor rekening"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
 
               <p className="text-gray-500 text-sm text-center mt-6">

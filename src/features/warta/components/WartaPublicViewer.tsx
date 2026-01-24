@@ -72,7 +72,12 @@ interface UlangTahunData {
 interface JemaatSakitItem {
   id: string
   name: string
-  condition?: string
+  location: string
+  keterangan?: string
+}
+
+interface JemaatSakitData {
+  items: JemaatSakitItem[]
 }
 
 interface PengumumanItem {
@@ -577,7 +582,7 @@ export default function WartaPublicViewer({ warta }: Props) {
       }
 
       case 'JEMAAT_SAKIT': {
-        const data = module.data as { items: JemaatSakitItem[] }
+        const data = module.data as JemaatSakitData
         const items = data.items || []
         return (
           <div key={module.id} className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 md:p-6 border border-red-100 dark:border-red-800">
@@ -586,19 +591,37 @@ export default function WartaPublicViewer({ warta }: Props) {
                 {index + 1}
               </span>
               <h3 className={`font-bold text-red-900 dark:text-red-100 flex-1 ${sizes.subheading}`}>
-                🙏 Jemaat Sakit
+                🙏 Pokok Doa (Jemaat Sakit)
               </h3>
             </div>
-            <div className="space-y-2">
-              {items.map((item) => (
-                <div key={item.id} className={sizes.base}>
-                  <span className="text-red-900 dark:text-red-100">{item.name}</span>
-                  {item.condition && (
-                    <span className="text-red-600 dark:text-red-400 ml-2">— {item.condition}</span>
-                  )}
-                </div>
-              ))}
-            </div>
+            
+            {items.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-red-200 dark:border-red-700">
+                      <th className="text-left py-2 px-2 text-red-700 dark:text-red-300 w-10">No</th>
+                      <th className="text-left py-2 px-2 text-red-700 dark:text-red-300">Nama</th>
+                      <th className="text-left py-2 px-2 text-red-700 dark:text-red-300">Lokasi / Keterangan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((item, idx) => (
+                      <tr key={item.id} className="border-b border-red-100 dark:border-red-800">
+                        <td className="py-2 px-2 text-red-800 dark:text-red-200 font-medium">{idx + 1}</td>
+                        <td className="py-2 px-2 text-red-900 dark:text-red-100 font-medium">{item.name}</td>
+                        <td className="py-2 px-2 text-red-700 dark:text-red-300">
+                          {item.location}
+                          {item.keterangan && <span className="text-red-500 dark:text-red-400 italic ml-1">({item.keterangan})</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-red-600 dark:text-red-400 italic ml-10">Tidak ada data jemaat sakit</p>
+            )}
           </div>
         )
       }

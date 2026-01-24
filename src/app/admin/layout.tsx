@@ -23,6 +23,7 @@ const sidebarItems = [
   { href: '/admin/pengumuman', label: 'Pengumuman', icon: 'megaphone' },
   { href: '/admin/renungan', label: 'Renungan Harian', icon: 'book' },
   { href: '/admin/keuangan', label: 'Keuangan', icon: 'currency' },
+  { href: '/admin/pembayaran', label: 'Pembayaran', icon: 'qris' },
   { href: '/admin/jadwal', label: 'Jadwal Ibadah', icon: 'calendar' },
   { href: '/admin/struktur', label: 'Struktur Organisasi', icon: 'users' },
   { href: '/admin/album', label: 'Album Galeri', icon: 'image' },
@@ -73,6 +74,11 @@ const icons: Record<string, JSX.Element> = {
   book: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+    </svg>
+  ),
+  qris: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
     </svg>
   ),
 }
@@ -220,7 +226,7 @@ export default function AdminLayout({
 
       {/* Sidebar - Desktop & Mobile Drawer */}
       <aside 
-        className={`fixed inset-y-0 left-0 w-64 bg-[#1e3a5f] dark:bg-gray-800 border-r border-[#2d4a6f] dark:border-gray-700 z-50 transform transition-transform duration-300 ease-in-out print:hidden ${
+        className={`fixed inset-y-0 left-0 w-64 bg-[#1e3a5f] dark:bg-gray-800 border-r border-[#2d4a6f] dark:border-gray-700 z-50 transform transition-transform duration-300 ease-in-out print:hidden overflow-y-auto admin-scrollbar ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
       >
@@ -251,7 +257,7 @@ export default function AdminLayout({
         </div>
 
         {/* Nav Items */}
-        <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-200px)] pb-4">
+        <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-200px)] pb-4 admin-scrollbar">
           {sidebarItems
             .filter(item => !('adminOnly' in item) || (item.adminOnly && userRole === 'admin'))
             .map((item) => (

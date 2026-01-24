@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GoogleMapComponent } from "@/components/ui/GoogleMapComponent";
+import { ContactMap } from "./ContactMap";
 
 export default function KontakPage() {
   return (
@@ -170,7 +170,7 @@ export default function KontakPage() {
 
       {/* Map */}
       <section className="h-96">
-        <GoogleMapComponent className="h-full w-full" />
+        <ContactMap />
       </section>
     </>
   );
