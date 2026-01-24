@@ -271,23 +271,6 @@ export default function ModuleRenderer({ module, onUpdate }: Props) {
           />
         </div>
       )
-    case 'ULANG_TAHUN':
-      const ulangTahunData = module.data as UlangTahunData
-      return (
-        <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg border border-pink-100 dark:border-pink-800">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="font-medium text-pink-900 dark:text-pink-100 flex items-center gap-2">
-              <span className="p-1 bg-pink-200 dark:bg-pink-800 rounded text-pink-800 dark:text-pink-100 text-xs font-bold">ULTAH</span>
-              Ulang Tahun Jemaat
-            </h4>
-          </div>
-          
-          <UlangTahunEditor 
-            data={ulangTahunData}
-            onUpdate={(newData) => onUpdate({ ...ulangTahunData, ...newData })}
-          />
-        </div>
-      )
     case 'JEMAAT_SAKIT':
       const jemaatSakitData = module.data as JemaatSakitData
       return (
