@@ -4,6 +4,22 @@ import { useEffect, useState, useCallback } from 'react'
 import Image from 'next/image'
 import { useToast } from '@/components/ui/Toast'
 
+// Helper function to ensure image URL is valid (same as galeri, struktur, album)
+const getImageUrl = (url: string | null): string => {
+  if (!url) return ''
+  
+  if (url.startsWith('data:') || url.startsWith('http')) {
+    return url
+  }
+  
+  if (url.startsWith('/api/images/')) {
+    return url
+  }
+  
+  const cleanPath = url.startsWith('/') ? url.slice(1) : url
+  return `/api/images/${cleanPath}`
+}
+
 interface BankAccount {
   bank_name: string
   account_number: string
@@ -43,6 +59,27 @@ export default function PembayaranAdminPage() {
     account_holder: '',
     color: 'blue'
   })
+
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    show: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+  }>({
+    show: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  })
+
+  const showConfirmation = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmModal({ show: true, title, message, onConfirm })
+  }
+
+  const closeConfirmation = () => {
+    setConfirmModal({ show: false, title: '', message: '', onConfirm: () => {} })
+  }
 
   const fetchSettings = useCallback(async () => {
     try {
@@ -124,9 +161,16 @@ export default function PembayaranAdminPage() {
     }
   }
 
-  const removeQris = async () => {
-    const newSettings = { ...settings, qris_image_url: null }
-    await saveSettings(newSettings)
+  const removeQris = () => {
+    showConfirmation(
+      'Hapus QRIS',
+      'Apakah Anda yakin ingin menghapus gambar QRIS?',
+      async () => {
+        const newSettings = { ...settings, qris_image_url: null }
+        await saveSettings(newSettings)
+        closeConfirmation()
+      }
+    )
   }
 
   const openBankForm = (index?: number) => {
@@ -157,11 +201,17 @@ export default function PembayaranAdminPage() {
     setShowBankForm(false)
   }
 
-  const deleteBankAccount = async (index: number) => {
-    if (!confirm('Hapus rekening bank ini?')) return
-    
-    const newAccounts = settings.bank_accounts.filter((_, i) => i !== index)
-    await saveSettings({ ...settings, bank_accounts: newAccounts })
+  const deleteBankAccount = (index: number) => {
+    const account = settings.bank_accounts[index]
+    showConfirmation(
+      'Hapus Rekening',
+      `Apakah Anda yakin ingin menghapus rekening ${account.bank_name}?`,
+      async () => {
+        const newAccounts = settings.bank_accounts.filter((_, i) => i !== index)
+        await saveSettings({ ...settings, bank_accounts: newAccounts })
+        closeConfirmation()
+      }
+    )
   }
 
   const getColorClasses = (color: string) => {
@@ -192,12 +242,13 @@ export default function PembayaranAdminPage() {
           <div className="space-y-4">
             {settings.qris_image_url ? (
               <div className="relative">
-                <div className="w-full aspect-square max-w-62.5 mx-auto rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-600">
+                <div className="w-full max-w-62.5 mx-auto rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-600 bg-white">
                   <Image
-                    src={settings.qris_image_url.startsWith('http') ? settings.qris_image_url : `/api/images/${settings.qris_image_url}`}
+                    src={getImageUrl(settings.qris_image_url)}
                     alt="QRIS"
-                    fill
-                    className="object-contain"
+                    width={250}
+                    height={250}
+                    className="w-full h-auto object-contain"
                   />
                 </div>
                 <button
@@ -381,6 +432,35 @@ export default function PembayaranAdminPage() {
                 className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
                 {saving ? 'Menyimpan...' : 'Simpan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmModal.show && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm p-6">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+              {confirmModal.title}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {confirmModal.message}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={closeConfirmation}
+                className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                disabled={saving}
+                className="flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {saving ? 'Menghapus...' : 'Hapus'}
               </button>
             </div>
           </div>

@@ -30,6 +30,22 @@ function formatCurrency(amount: number) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
 }
 
+// Helper function to ensure image URL is valid (same as admin pages)
+const getImageUrl = (url: string | null): string => {
+  if (!url) return ''
+  
+  if (url.startsWith('data:') || url.startsWith('http')) {
+    return url
+  }
+  
+  if (url.startsWith('/api/images/')) {
+    return url
+  }
+  
+  const cleanPath = url.startsWith('/') ? url.slice(1) : url
+  return `/api/images/${cleanPath}`
+}
+
 const COLOR_MAP: Record<string, { bg: string; border: string; text: string; textDark: string; button: string }> = {
   blue: { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-800', textDark: 'text-blue-900', button: 'hover:bg-blue-100 text-blue-600' },
   yellow: { bg: 'bg-yellow-50', border: 'border-yellow-100', text: 'text-yellow-800', textDark: 'text-yellow-900', button: 'hover:bg-yellow-100 text-yellow-600' },
@@ -209,14 +225,14 @@ export default function KeuanganPage() {
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* QRIS */}
             <div className="bg-white rounded-2xl p-8 text-center">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Scan QRIS</h3>
-              <div className="w-56 h-56 mx-auto bg-gray-100 rounded-xl flex items-center justify-center mb-4 border-2 border-dashed border-gray-300 overflow-hidden">
+              <h3 className="text-xl font-bold text-gray-900! mb-4">Scan QRIS</h3>
+              <div className="w-72 h-72 mx-auto bg-white rounded-xl flex items-center justify-center mb-4 overflow-hidden">
                 {paymentSettings.qris_image_url ? (
                   <Image
-                    src={paymentSettings.qris_image_url.startsWith('http') ? paymentSettings.qris_image_url : `/api/images/${paymentSettings.qris_image_url}`}
+                    src={getImageUrl(paymentSettings.qris_image_url)}
                     alt="QRIS"
-                    width={224}
-                    height={224}
+                    width={288}
+                    height={288}
                     className="w-full h-full object-contain"
                   />
                 ) : (
@@ -224,40 +240,40 @@ export default function KeuanganPage() {
                     <svg className="w-16 h-16 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                     </svg>
-                    <p className="text-gray-500 text-sm">QR Code QRIS</p>
-                    <p className="text-gray-400 text-xs mt-1">Belum tersedia</p>
+                    <p className="text-gray-600! text-sm">QR Code QRIS</p>
+                    <p className="text-gray-500! text-xs mt-1">Belum tersedia</p>
                   </div>
                 )}
               </div>
-              <p className="text-gray-900 text-sm">
+              <p className="text-gray-700! text-sm">
                 Scan dengan aplikasi e-wallet atau mobile banking Anda
               </p>
             </div>
 
             {/* Bank Account */}
             <div className="bg-white rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">Transfer Bank</h3>
+              <h3 className="text-xl font-bold text-gray-900! mb-6 text-center">Transfer Bank</h3>
               
               <div className="space-y-4">
                 {paymentSettings.bank_accounts.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">Belum ada rekening bank</p>
+                  <p className="text-gray-600! text-center py-4">Belum ada rekening bank</p>
                 ) : (
                   paymentSettings.bank_accounts.map((account, index) => {
                     const colors = getColors(account.color);
                     return (
                       <div key={index} className={`p-4 ${colors.bg} rounded-xl border ${colors.border}`}>
                         <div className="flex items-center justify-between mb-2">
-                          <span className={`font-bold ${colors.text}`}>{account.bank_name}</span>
+                          <span className="font-bold text-gray-900!">{account.bank_name}</span>
                           <span className={`text-xs ${colors.bg} ${colors.text} px-2 py-1 rounded-full border ${colors.border}`}>Rekening Gereja</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className={`text-2xl font-mono font-bold ${colors.textDark}`}>{account.account_number}</p>
-                            <p className={`${colors.text} text-sm mt-1`}>a.n. {account.account_holder}</p>
+                            <p className="text-2xl font-mono font-bold text-gray-900!">{account.account_number}</p>
+                            <p className="text-sm text-gray-700!">a.n. {account.account_holder}</p>
                           </div>
                           <button 
                             onClick={() => copyToClipboard(account.account_number)}
-                            className={`p-2 ${colors.button} rounded-lg transition-colors`}
+                            className="p-2 text-amber-700! hover:bg-amber-100 rounded-lg transition-colors"
                             title="Salin nomor rekening"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -271,7 +287,7 @@ export default function KeuanganPage() {
                 )}
               </div>
 
-              <p className="text-gray-500 text-sm text-center mt-6">
+              <p className="text-gray-700! text-sm text-center mt-6">
                 Mohon konfirmasi setelah transfer ke bendahara gereja
               </p>
             </div>
