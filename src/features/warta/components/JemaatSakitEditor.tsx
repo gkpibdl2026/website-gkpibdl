@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus, Trash2, GripVertical, HeartPulse } from 'lucide-react'
+// import { useState } from 'react' <-- removed
+import { Trash2, GripVertical, HeartPulse } from 'lucide-react'
 import {
   DndContext, 
   closestCenter,

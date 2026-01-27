@@ -33,7 +33,7 @@ interface Song {
   title: string
   song_number: string
   category: string
-  lyrics: any
+  lyrics: unknown
   created_at: string
   updated_at: string
 }
@@ -176,7 +176,7 @@ async function updateSongs(changes: Array<{song: Song, cleaned: CleanedData | nu
     if (!cleaned) continue
 
     try {
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         title: cleaned.cleanTitle,
         updated_at: new Date().toISOString()
       }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin, type Song } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 
 interface Params {
   params: Promise<{ id: string }>

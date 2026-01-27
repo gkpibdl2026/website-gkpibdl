@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, GripVertical, Cake } from 'lucide-react'
+import { Trash2, GripVertical, Cake } from 'lucide-react'
 import {
   DndContext, 
   closestCenter,

@@ -166,7 +166,7 @@ export default function StatistikEditor({ data, onUpdate }: Props) {
 
   const addRow = () => {
     const newRow: StatistikRow = {
-      id: `stat-${Date.now()}`,
+      id: `stat-${crypto.randomUUID()}`,
       keterangan: '',
       bapak: null,
       ibu: null,

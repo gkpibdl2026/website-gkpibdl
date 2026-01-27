@@ -32,6 +32,15 @@ interface CreateModalState {
 
 type SortKey = 'name' | 'email' | 'role' | 'approved' | 'lingkungan' | 'created_at'
 
+function SortIcon({ column, sortKey, sortDirection }: { column: SortKey, sortKey: SortKey, sortDirection: 'asc' | 'desc' }) {
+  if (sortKey !== column) return <span className="ml-1 text-gray-300">↕</span>
+  return (
+    <span className="ml-1 text-blue-600">
+      {sortDirection === 'asc' ? '↑' : '↓'}
+    </span>
+  )
+}
+
 export function UserManagementView() {
   const { userRole } = useAuth()
   const { users, loading, error, updating, fetchUsers, updateUser, deleteUser, createUser } = useUsers()
@@ -87,8 +96,8 @@ export function UserManagementView() {
 
     // 2. Sort
     result.sort((a, b) => {
-      let aValue: any = ''
-      let bValue: any = ''
+      let aValue: string | number = ''
+      let bValue: string | number = ''
 
       switch (sortKey) {
         case 'name':
@@ -117,8 +126,11 @@ export function UserManagementView() {
           break
       }
 
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      const aValueRaw = aValue
+      const bValueRaw = bValue
+
+      if (aValueRaw < bValueRaw) return sortDirection === 'asc' ? -1 : 1
+      if (aValueRaw > bValueRaw) return sortDirection === 'asc' ? 1 : -1
       return 0
     })
 
@@ -132,15 +144,6 @@ export function UserManagementView() {
       setSortKey(key)
       setSortDirection('asc')
     }
-  }
-
-  const SortIcon = ({ column }: { column: SortKey }) => {
-    if (sortKey !== column) return <span className="ml-1 text-gray-300">↕</span>
-    return (
-      <span className="ml-1 text-blue-600">
-        {sortDirection === 'asc' ? '↑' : '↓'}
-      </span>
-    )
   }
 
   // ... (Keep existing Edit Modal logic)
@@ -609,25 +612,25 @@ export function UserManagementView() {
                   onClick={() => handleSort('name')}
                   className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
-                  <div className="flex items-center">User <SortIcon column="name" /></div>
+                  <div className="flex items-center">User <SortIcon column="name" sortKey={sortKey} sortDirection={sortDirection} /></div>
                 </th>
                 <th
                   onClick={() => handleSort('role')}
                   className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
-                   <div className="flex items-center">Role <SortIcon column="role" /></div>
+                   <div className="flex items-center">Role <SortIcon column="role" sortKey={sortKey} sortDirection={sortDirection} /></div>
                 </th>
                 <th
                   onClick={() => handleSort('approved')}
                   className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
-                   <div className="flex items-center">Status <SortIcon column="approved" /></div>
+                   <div className="flex items-center">Status <SortIcon column="approved" sortKey={sortKey} sortDirection={sortDirection} /></div>
                 </th>
                 <th
                   onClick={() => handleSort('lingkungan')}
                   className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
-                   <div className="flex items-center">Info <SortIcon column="lingkungan" /></div>
+                   <div className="flex items-center">Info <SortIcon column="lingkungan" sortKey={sortKey} sortDirection={sortDirection} /></div>
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
@@ -637,7 +640,7 @@ export function UserManagementView() {
                 <tr key={user.id} className={`${updating === user.id ? 'opacity-50' : ''} hover:bg-gray-50 dark:hover:bg-gray-700/50`}>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shrink-0">
                         <span className="text-white font-medium text-sm">
                           {(user.first_name || user.google_name || user.name || user.email)?.[0]?.toUpperCase() || '?'}
                         </span>

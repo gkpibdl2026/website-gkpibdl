@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Create user (admin) or Sync Google user (login)
 export async function POST(request: NextRequest) {
-  let body: any = null
+  let body: unknown = null
   try {
     body = await request.json()
   } catch {
@@ -65,16 +65,30 @@ export async function POST(request: NextRequest) {
   }
 
   // Check if it's a create action
-  if (body && body.action === 'create') {
-    return handleCreateUser(request, body)
+  const payload = body as Record<string, unknown> | null
+  if (payload && payload.action === 'create') {
+    return handleCreateUser(request, payload as unknown as CreateUserBody)
   }
 
   // Otherwise, handle sync
-  return handleSyncUser(request, body)
+  return handleSyncUser(request)
+}
+
+interface CreateUserBody {
+  email: string;
+  password?: string;
+  first_name?: string;
+  last_name?: string;
+  whatsapp?: string;
+  lingkungan?: number;
+  alamat?: string;
+  role?: string;
+  approved?: boolean;
+  action?: 'create'; 
 }
 
 // Handle Admin Creating New User
-async function handleCreateUser(request: NextRequest, body: any) {
+async function handleCreateUser(request: NextRequest, body: CreateUserBody) {
   const authResult = await verifyAdminAccess(request)
   if ('error' in authResult) {
     return NextResponse.json({ error: authResult.error }, { status: authResult.status })
@@ -98,15 +112,16 @@ async function handleCreateUser(request: NextRequest, body: any) {
         displayName,
         emailVerified: true // Auto verify since admin created it
       })
-    } catch (error: any) {
-      if (error.code === 'auth/email-already-exists') {
+    } catch (error: unknown) {
+      const firebaseError = error as { code?: string; message?: string };
+      if (firebaseError.code === 'auth/email-already-exists') {
         return NextResponse.json({ error: 'Email is already being used' }, { status: 409 }) // Conflict
       }
-      if (error.code === 'auth/invalid-password') {
+      if (firebaseError.code === 'auth/invalid-password') {
         return NextResponse.json({ error: 'Password is too weak (min 6 characters)' }, { status: 400 })
       }
       console.error('Firebase create error:', error)
-      return NextResponse.json({ error: error.message || 'Failed to create Firebase user' }, { status: 500 })
+      return NextResponse.json({ error: firebaseError.message || 'Failed to create Firebase user' }, { status: 500 })
     }
 
     // 2. Format WhatsApp if provided
@@ -157,7 +172,7 @@ async function handleCreateUser(request: NextRequest, body: any) {
 }
 
 // Handle Sync (Login)
-async function handleSyncUser(request: NextRequest, body: any) {
+async function handleSyncUser(request: NextRequest) {
   try {
     const token = request.headers.get('Authorization')?.split('Bearer ')[1]
     if (!token) {
