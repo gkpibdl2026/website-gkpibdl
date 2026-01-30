@@ -47,6 +47,24 @@ const fallbackRenungan = {
   title: "Hikmat Sejati",
 };
 
+// Decode HTML entities from API data
+const decodeHtmlEntities = (text: string | null | undefined): string => {
+  if (!text) return '';
+  return text
+    .replace(/&#8220;/g, '"')  // Left double quote
+    .replace(/&#8221;/g, '"')  // Right double quote
+    .replace(/&#8216;/g, "'")  // Left single quote
+    .replace(/&#8217;/g, "'")  // Right single quote
+    .replace(/&#8211;/g, '–')  // En dash
+    .replace(/&#8212;/g, '—')  // Em dash
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+};
+
 export default function Home() {
   const [jadwalData, setJadwalData] = useState<Jadwal[]>([]);
   const [pengumumanData, setPengumumanData] = useState<Pengumuman[]>([]);
@@ -172,12 +190,12 @@ export default function Home() {
                   </span>
                 </div>
                 {renunganData.title && (
-                  <h3 className="text-white font-bold text-lg mb-2">{renunganData.title}</h3>
+                  <h3 className="text-white font-bold text-lg mb-2">{decodeHtmlEntities(renunganData.title)}</h3>
                 )}
                 <p className="text-white italic text-base mb-3 leading-relaxed line-clamp-3">
-                  &ldquo;{renunganData.ayat_kunci || fallbackRenungan.ayat_kunci}&rdquo;
+                  &ldquo;{decodeHtmlEntities(renunganData.ayat_kunci) || fallbackRenungan.ayat_kunci}&rdquo;
                 </p>
-                <p className="text-blue-200 text-sm">— {renunganData.referensi || fallbackRenungan.referensi}</p>
+                <p className="text-blue-200 text-sm">— {decodeHtmlEntities(renunganData.referensi) || fallbackRenungan.referensi}</p>
                 {renunganData.source === 'gkpi_sinode' && (
                   <p className="text-blue-300/70 text-xs mt-3">
                     Sumber: GKPI Sinode
