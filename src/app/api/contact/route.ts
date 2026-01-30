@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     // Send email to admin
     const { error } = await resend.emails.send({
       from: 'Website GKPI <onboarding@resend.dev>', // Change after domain verification
-      to: ['info@gkpibdl.org'], // Admin email
+      to: ['gkpibdl2026@gmail.com'], // Testing - change to info@gkpibdl.org after domain verification
       subject: `[Kontak Website] ${subject}`,
       html: `
         <h2>Pesan dari Website</h2>

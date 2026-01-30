@@ -146,3 +146,120 @@ export function CardsGridSkeleton({ count = 6 }: { count?: number }) {
     </div>
   )
 }
+
+/**
+ * Skeleton for homepage Renungan card (Hero section)
+ */
+export function RenunganHomeSkeleton() {
+  return (
+    <div className="bg-blue-900/60 backdrop-blur-md rounded-2xl p-6 border border-white/30 max-w-md animate-pulse">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-2 h-2 rounded-full bg-yellow-400/50"></div>
+        <div className="h-3 bg-white/20 rounded w-28"></div>
+      </div>
+      <div className="h-5 bg-white/20 rounded w-3/4 mb-3"></div>
+      <div className="space-y-2 mb-3">
+        <div className="h-4 bg-white/15 rounded w-full"></div>
+        <div className="h-4 bg-white/15 rounded w-5/6"></div>
+        <div className="h-4 bg-white/15 rounded w-4/6"></div>
+      </div>
+      <div className="h-3 bg-white/10 rounded w-1/3"></div>
+    </div>
+  )
+}
+
+/**
+ * Skeleton for homepage Jadwal sidebar (Hero section)
+ */
+export function JadwalHomeSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="flex items-center gap-4 p-4 bg-white/5 rounded-xl animate-pulse"
+        >
+          <div className="w-12 h-12 rounded-full bg-white/10"></div>
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-white/10 rounded w-3/4"></div>
+            <div className="h-3 bg-white/10 rounded w-1/2"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * Skeleton for Warta card grid on homepage
+ */
+export function WartaCardHomeSkeleton() {
+  return (
+    <div className="bg-(--bg-secondary) rounded-2xl overflow-hidden border border-(--border) animate-pulse">
+      <div className="h-48 bg-gray-200 dark:bg-gray-700"></div>
+      <div className="p-6 space-y-3">
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+      </div>
+    </div>
+  )
+}
+
+export function WartaGridHomeSkeleton() {
+  return (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[1, 2, 3].map((i) => (
+        <WartaCardHomeSkeleton key={i} />
+      ))}
+    </div>
+  )
+}
+
+/**
+ * Skeleton for Pengumuman list on homepage
+ */
+export function PengumumanHomeSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2].map((i) => (
+        <div
+          key={i}
+          className="flex flex-col sm:flex-row sm:items-start gap-4 p-6 bg-(--bg-primary) rounded-2xl border border-(--border) animate-pulse"
+        >
+          <div className="w-24 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+          <div className="flex-1 space-y-3">
+            <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * Skeleton for mobile Jadwal section
+ */
+export function JadwalMobileHomeSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="flex items-center gap-4 p-4 bg-(--bg-secondary) rounded-xl animate-pulse"
+        >
+          <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+

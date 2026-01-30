@@ -2,6 +2,13 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import {
+  RenunganHomeSkeleton,
+  JadwalHomeSkeleton,
+  WartaGridHomeSkeleton,
+  PengumumanHomeSkeleton,
+  JadwalMobileHomeSkeleton
+} from "@/components/ui/Skeleton";
 
 interface Jadwal {
   id: string;
@@ -242,9 +249,7 @@ export default function Home() {
               </div>
               <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 space-y-4">
                 {isLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
-                  </div>
+                  <JadwalHomeSkeleton />
                 ) : jadwalData.length === 0 ? (
                   <p className="text-white/70 text-center py-4">
                     Belum ada jadwal ibadah
@@ -399,9 +404,7 @@ export default function Home() {
             </h2>
           </div>
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-            </div>
+            <JadwalMobileHomeSkeleton />
           ) : (
             <div className="space-y-4">
               {jadwalData.map((jadwal) => (
@@ -464,9 +467,7 @@ export default function Home() {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-            </div>
+            <WartaGridHomeSkeleton />
           ) : wartaData.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-(--text-secondary)">Belum ada warta jemaat</p>
@@ -568,9 +569,7 @@ export default function Home() {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full"></div>
-            </div>
+            <PengumumanHomeSkeleton />
           ) : pengumumanData.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-(--text-secondary)">Belum ada pengumuman</p>
