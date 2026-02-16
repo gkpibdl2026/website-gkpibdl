@@ -9,6 +9,7 @@ export { default as VerseSelector } from './components/VerseSelector'
 export { default as WartaLivePreview } from './components/WartaLivePreview'
 export { default as WartaModuleBuilder } from './components/WartaModuleBuilder'
 export { default as WartaPreviewModal } from './components/WartaPreviewModal'
+export { default as KeuanganEditor } from './components/KeuanganEditor'
 
 // Types
 export * from './types'

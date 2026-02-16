@@ -7,6 +7,7 @@ import PelayanIbadahEditor from './PelayanIbadahEditor'
 import StatistikEditor from './StatistikEditor'
 import UlangTahunEditor from './UlangTahunEditor'
 import JemaatSakitEditor from './JemaatSakitEditor'
+import KeuanganEditor from './KeuanganEditor'
 import { TataIbadahItem } from '@/lib/supabase'
 
 // Type for Pelayan Ibadah
@@ -285,6 +286,29 @@ export default function ModuleRenderer({ module, onUpdate }: Props) {
           <JemaatSakitEditor 
             data={jemaatSakitData}
             onUpdate={(newData) => onUpdate({ ...jemaatSakitData, ...newData })}
+          />
+        </div>
+      )
+    case 'KEUANGAN':
+      const keuanganData = module.data as {
+        period?: string
+        pemasukan?: number
+        pengeluaran?: number
+        saldo?: number
+        items?: { id: string; label: string; amount: number }[]
+      }
+      return (
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-medium text-green-900 dark:text-green-100 flex items-center gap-2">
+              <span className="p-1 bg-green-200 dark:bg-green-800 rounded text-green-800 dark:text-green-100 text-xs font-bold">KEUANGAN</span>
+              Laporan Keuangan
+            </h4>
+          </div>
+          
+          <KeuanganEditor 
+            data={keuanganData}
+            onUpdate={(newData) => onUpdate({ ...keuanganData, ...newData })}
           />
         </div>
       )
