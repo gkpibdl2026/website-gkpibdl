@@ -5,6 +5,7 @@ export interface Pengumuman {
   id: string;
   judul: string;
   konten: string;
+  image_urls?: string[];
   tanggal_mulai?: string;
   tanggal_selesai?: string;
   prioritas?: 'tinggi' | 'sedang' | 'rendah';
@@ -12,3 +13,4 @@ export interface Pengumuman {
   created_at?: string;
   updated_at?: string;
 }
+

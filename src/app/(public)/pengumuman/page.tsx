@@ -1,45 +1,47 @@
 'use client'
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import Image from 'next/image'
+import Link from 'next/link'
+import { useState, useEffect } from 'react'
 
 interface Pengumuman {
-  id: string;
-  title: string;
-  content: string;
-  priority: string;
-  created_at: string;
+  id: string
+  title: string
+  content: string
+  priority: string
+  image_urls?: string[]
+  created_at: string
 }
 
 export default function PengumumanPage() {
-  const [pengumumanData, setPengumumanData] = useState<Pengumuman[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [pengumumanData, setPengumumanData] = useState<Pengumuman[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    fetchPengumuman();
-  }, []);
+    fetchPengumuman()
+  }, [])
 
   const fetchPengumuman = async () => {
     try {
-      const res = await fetch('/api/pengumuman?visible=true');
+      const res = await fetch('/api/pengumuman?visible=true')
       if (res.ok) {
-        const { data } = await res.json();
-        setPengumumanData(data || []);
+        const { data } = await res.json()
+        setPengumumanData(data || [])
       }
     } catch (error) {
-      console.error('Error fetching pengumuman:', error);
+      console.error('Error fetching pengumuman:', error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric'
-    });
-  };
+      year: 'numeric',
+    })
+  }
 
   return (
     <>
@@ -73,37 +75,54 @@ export default function PengumumanPage() {
           ) : (
             <div className="space-y-6">
               {pengumumanData.map((item) => (
-                <Link 
+                <Link
                   key={item.id}
                   href={`/pengumuman/${item.id}`}
-                  className={`block p-6 rounded-2xl border-l-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-all group ${
-                    item.priority === 'urgent' 
-                      ? 'border-l-red-500 bg-red-50/30 dark:bg-red-900/20' 
-                      : item.priority === 'important' 
-                      ? 'border-l-amber-500 bg-amber-50/30 dark:bg-amber-900/20' 
+                  className={`flex flex-col md:flex-row rounded-2xl border-l-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-all group overflow-hidden ${
+                    item.priority === 'urgent'
+                      ? 'border-l-red-500'
+                      : item.priority === 'important'
+                      ? 'border-l-amber-500'
                       : 'border-l-gray-300 dark:border-l-gray-600'
                   }`}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                    <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold shrink-0 w-fit ${
-                      item.priority === 'urgent' 
-                        ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' 
-                        : item.priority === 'important' 
-                        ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300' 
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                    }`}>
-                      {item.priority === 'urgent' ? '🔴 Mendesak' : item.priority === 'important' ? '🟡 Penting' : 'ℹ️ Info'}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">{formatDate(item.created_at)}</p>
-                      <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{item.title}</h3>
-                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3">{item.content}</p>
-                      <span className="inline-flex items-center gap-1 mt-4 text-blue-600 dark:text-blue-400 text-sm font-medium">
-                        Baca selengkapnya
-                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                  {/* Gambar (jika ada) */}
+                  {item.image_urls && item.image_urls.length > 0 && (
+                    <div className="relative w-full md:w-72 lg:w-80 shrink-0 aspect-video md:aspect-auto overflow-hidden">
+                      <Image
+                        src={item.image_urls[0]}
+                        alt={item.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+
+                  <div className="p-6 flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                      <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold shrink-0 w-fit ${
+                        item.priority === 'urgent'
+                          ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300'
+                          : item.priority === 'important'
+                          ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                      }`}>
+                        {item.priority === 'urgent' ? '🔴 Mendesak' : item.priority === 'important' ? '🟡 Penting' : 'ℹ️ Info'}
                       </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">{formatDate(item.created_at)}</p>
+                        <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          {item.title}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3">{item.content}</p>
+                        <span className="inline-flex items-center gap-1 mt-4 text-blue-600 dark:text-blue-400 text-sm font-medium">
+                          Baca selengkapnya
+                          <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -113,5 +132,5 @@ export default function PengumumanPage() {
         </div>
       </section>
     </>
-  );
+  )
 }

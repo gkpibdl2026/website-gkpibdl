@@ -10,10 +10,10 @@ interface Props {
 // Dynamic Metadata Generator (SEO)
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  
+
   const { data: pengumuman } = await supabaseAdmin
     .from('pengumuman')
-    .select('title, content, priority')
+    .select('title, content, priority, image_urls')
     .eq('id', id)
     .single()
 
@@ -24,10 +24,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   // Priority emoji prefix
-  const priorityPrefix = pengumuman.priority === 'urgent' ? '🔴 ' 
-    : pengumuman.priority === 'important' ? '🟡 ' 
+  const priorityPrefix = pengumuman.priority === 'urgent' ? '🔴 '
+    : pengumuman.priority === 'important' ? '🟡 '
     : ''
-  
+
   // Get first 160 chars of content for description
   const description = pengumuman.content
     .substring(0, 160)
@@ -43,7 +43,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${priorityPrefix}${pengumuman.title}`,
       description: description,
       type: 'article',
-      images: ['/logo-gkpi.png'],
+      // Gunakan gambar pertama jika ada, fallback ke logo
+      images: [pengumuman.image_urls?.[0] || '/logo-gkpi.png'],
     },
   }
 }
@@ -63,13 +64,14 @@ export default async function PengumumanDetailPage({ params }: Props) {
   }
 
   return (
-    <PengumumanViewer 
+    <PengumumanViewer
       pengumuman={{
         id: pengumuman.id,
         title: pengumuman.title,
         content: pengumuman.content,
         priority: pengumuman.priority,
-        created_at: pengumuman.created_at
+        image_urls: pengumuman.image_urls || [],
+        created_at: pengumuman.created_at,
       }}
     />
   )

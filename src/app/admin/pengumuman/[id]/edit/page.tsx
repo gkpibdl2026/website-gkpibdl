@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useNotification } from '@/features/common'
+import { PengumumanImageUpload } from '@/features/pengumuman'
 
 export default function EditPengumuman() {
   const params = useParams()
@@ -17,6 +18,7 @@ export default function EditPengumuman() {
     priority: 'normal',
     visible: true,
     expires_at: '',
+    image_urls: [] as string[],
   })
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -33,6 +35,7 @@ export default function EditPengumuman() {
             priority: data.priority || 'normal',
             visible: data.visible ?? true,
             expires_at: data.expires_at?.split('T')[0] || '',
+            image_urls: data.image_urls || [],
           })
         }
       } catch (error) {
@@ -49,10 +52,15 @@ export default function EditPengumuman() {
     setIsSubmitting(true)
     
     try {
+      const payload = {
+        ...formData,
+        expires_at: formData.expires_at || null,
+      }
+
       const res = await fetch(`/api/pengumuman/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       })
       
       if (res.ok) {
@@ -90,6 +98,8 @@ export default function EditPengumuman() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-6">
+
+          {/* Judul */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Judul</label>
             <input
@@ -102,6 +112,7 @@ export default function EditPengumuman() {
             />
           </div>
 
+          {/* Isi */}
           <div>
             <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Isi</label>
             <textarea
@@ -114,6 +125,15 @@ export default function EditPengumuman() {
             />
           </div>
 
+          {/* Upload Gambar */}
+          <PengumumanImageUpload
+            initialUrls={formData.image_urls}
+            onUploadComplete={(urls) =>
+              setFormData((prev) => ({ ...prev, image_urls: urls }))
+            }
+          />
+
+          {/* Prioritas */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prioritas</label>
             <div className="flex gap-4">
@@ -127,12 +147,15 @@ export default function EditPengumuman() {
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                     className="w-4 h-4"
                   />
-                  <span className="capitalize text-gray-700 dark:text-gray-300">{p === 'normal' ? 'Info' : p === 'important' ? 'Penting' : 'Mendesak'}</span>
+                  <span className="capitalize text-gray-700 dark:text-gray-300">
+                    {p === 'normal' ? 'Info' : p === 'important' ? 'Penting' : 'Mendesak'}
+                  </span>
                 </label>
               ))}
             </div>
           </div>
 
+          {/* Tanggal Kadaluarsa */}
           <div>
             <label htmlFor="expires" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tanggal Kadaluarsa</label>
             <input
@@ -140,10 +163,11 @@ export default function EditPengumuman() {
               id="expires"
               value={formData.expires_at}
               onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-purple-500 bg-white dark:bg-gray-700 dark:text-white"
             />
           </div>
 
+          {/* Visible */}
           <div className="flex items-center gap-3">
             <input
               type="checkbox"
@@ -157,7 +181,9 @@ export default function EditPengumuman() {
         </div>
 
         <div className="flex items-center justify-end gap-4">
-          <Link href="/admin/pengumuman" className="px-6 py-3 text-red-500 dark:text-red-400 font-medium hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors">Batal</Link>
+          <Link href="/admin/pengumuman" className="px-6 py-3 text-red-500 dark:text-red-400 font-medium hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors">
+            Batal
+          </Link>
           <button
             type="submit"
             disabled={isSubmitting}

@@ -3,8 +3,8 @@
 // Types
 export * from './types';
 
-// Components (uncomment as components are created)
-// export * from './components';
+// Components
+export * from './components';
 
 // Hooks (uncomment as hooks are created)
 // export * from './hooks';

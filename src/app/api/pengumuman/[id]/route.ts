@@ -43,6 +43,7 @@ export async function PUT(request: Request, { params }: Params) {
         content: body.content,
         priority: body.priority,
         visible: body.visible,
+        image_urls: body.image_urls || [],
         expires_at: body.expires_at || null,
         updated_at: new Date().toISOString(),
       })

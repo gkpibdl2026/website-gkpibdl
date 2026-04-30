@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useNotification } from '@/features/common'
 import { useRouter } from 'next/navigation'
+import { PengumumanImageUpload } from '@/features/pengumuman'
 
 export default function NewPengumuman() {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ export default function NewPengumuman() {
     priority: 'normal',
     visible: true,
     expires_at: '',
+    image_urls: [] as string[],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { showToast } = useNotification()
@@ -22,10 +24,15 @@ export default function NewPengumuman() {
     setIsSubmitting(true)
     
     try {
+      const payload = {
+        ...formData,
+        expires_at: formData.expires_at || null,
+      }
+
       const res = await fetch('/api/pengumuman', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       })
       
       if (res.ok) {
@@ -56,6 +63,8 @@ export default function NewPengumuman() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-6">
+
+          {/* Judul */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Judul Pengumuman <span className="text-red-500">*</span>
@@ -71,6 +80,7 @@ export default function NewPengumuman() {
             />
           </div>
 
+          {/* Isi */}
           <div>
             <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Isi Pengumuman <span className="text-red-500">*</span>
@@ -86,6 +96,14 @@ export default function NewPengumuman() {
             />
           </div>
 
+          {/* Upload Gambar */}
+          <PengumumanImageUpload
+            onUploadComplete={(urls) =>
+              setFormData((prev) => ({ ...prev, image_urls: urls }))
+            }
+          />
+
+          {/* Prioritas */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prioritas</label>
             <div className="flex gap-4">
@@ -111,6 +129,7 @@ export default function NewPengumuman() {
             </div>
           </div>
 
+          {/* Tanggal Kadaluarsa */}
           <div>
             <label htmlFor="expires" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Tanggal Kadaluarsa (Opsional)
@@ -125,6 +144,7 @@ export default function NewPengumuman() {
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Pengumuman akan otomatis disembunyikan setelah tanggal ini</p>
           </div>
 
+          {/* Visible */}
           <div className="flex items-center gap-3">
             <input
               type="checkbox"

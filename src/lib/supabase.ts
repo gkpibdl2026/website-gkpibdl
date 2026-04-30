@@ -89,6 +89,7 @@ export interface Pengumuman {
   content: string
   priority: 'normal' | 'important' | 'urgent'
   visible: boolean
+  image_urls?: string[]
   expires_at?: string
   created_at: string
   updated_at: string

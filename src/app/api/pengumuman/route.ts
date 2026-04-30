@@ -42,6 +42,7 @@ export async function POST(request: Request) {
       content: body.content,
       priority: body.priority || 'normal',
       visible: body.visible ?? true,
+      image_urls: body.image_urls || [],
       expires_at: body.expires_at || null,
     }
 
