@@ -20,20 +20,31 @@ export default function RenunganListPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchRenungan();
-  }, []);
+    const fetchRenungan = async () => {
+      try {
+        const res = await fetch('/api/renungan');
+        const { data } = await res.json();
+        setRenunganList(data || []);
+      } catch (error) {
+        console.error('Error fetching renungan:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const fetchRenungan = async () => {
-    try {
-      const res = await fetch('/api/renungan');
-      const { data } = await res.json();
-      setRenunganList(data || []);
-    } catch (error) {
-      console.error('Error fetching renungan:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // Cek apakah renungan hari ini sudah ada, jika belum trigger sync otomatis
+    const checkAndSync = async () => {
+      try {
+        await fetch('/api/renungan/check-today');
+      } catch {
+        // Silent fail — lanjut fetch data apapun hasilnya
+      } finally {
+        fetchRenungan();
+      }
+    };
+
+    checkAndSync();
+  }, []);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
